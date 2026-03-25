@@ -76,6 +76,92 @@
 //     func(inventory, new_data);
 // }
 
+// // Funcții statice de căutare (supraîncărcare)
+// // Nu depind de obiectul Inventory curent
+// // Primesc direct un tablou de obiecte în care să caute
+// static Material *find_material_by_id(Material *materials, const int &materials_count, const char *find_id);
+// static Provider *find_provider_by_id(Provider *providers, const int &providers_count, const char *find_id);
+// static Order *find_order_by_id(Order *orders, const int &orders_count, const char *find_id);
+//
+
+// Variante statice ale metodelor de sortare
+// Utile când vrem să sortăm un tablou oarecare de obiecte
+static void sort_materials_by_name_ascending(Material *materials, const int &materials_count);
+static void sort_materials_by_name_descending(Material *materials, const int &materials_count);
+static void sort_materials_by_quantity_ascending(Material *materials, const int &materials_count);
+static void sort_materials_by_quantity_descending(Material *materials, const int &materials_count);
+static void sort_orders_by_total_price_ascending(Order *orders, const int &orders_count);
+static void sort_orders_by_total_price_descending(Order *orders, const int &orders_count);
+
+Material *Inventory::find_material_by_id(Material *materials, const int &materials_count, const char *find_id) {
+for (int i = 0; i < materials_count; i++)
+if (strcmp(materials[i].get_material_id(), find_id) == 0)
+return &materials[i];
+
+    return nullptr;
+}
+
+Provider *Inventory::find_provider_by_id(Provider *providers, const int &providers_count, const char *find_id) {
+for (int i = 0; i < providers_count; i++)
+if (strcmp(providers[i].get_provider_id(), find_id) == 0)
+return &providers[i];
+
+    return nullptr;
+}
+
+Order *Inventory::find_order_by_id(Order *orders, const int &orders_count, const char *find_id) {
+for (int i = 0; i < orders_count; i++)
+if (strcmp(orders[i].get_order_id(), find_id) == 0)
+return &orders[i];
+return nullptr;
+}
+
+// Variante statice ale sortărilor
+void Inventory::sort_materials_by_name_ascending(Material *materials, const int &materials_count) {
+for (int i = 0; i < materials_count - 1; i++)
+for (int j = i + 1; j < materials_count; j++)
+if (strcmp(materials[i].get_material_name(), materials[j].get_material_name()) > 0)
+Material::swap(materials[i], materials[j]);
+}
+
+void Inventory::sort_materials_by_name_descending(Material *materials, const int &materials_count) {
+for (int i = 0; i < materials_count - 1; i++)
+for (int j = i + 1; j < materials_count; j++)
+if (strcmp(materials[i].get_material_name(), materials[j].get_material_name()) < 0)
+Material::swap(materials[i], materials[j]);
+}
+
+void Inventory::sort_materials_by_quantity_ascending(
+Material *materials, const int &materials_count) {
+for (int i = 0; i < materials_count - 1; i++)
+for (int j = i + 1; j < materials_count; j++)
+if (materials[i].get_material_quantity() > materials[j].get_material_quantity())
+Material::swap(materials[i], materials[j]);
+}
+
+void Inventory::sort_materials_by_quantity_descending(
+Material *materials, const int &materials_count) {
+for (int i = 0; i < materials_count - 1; i++)
+for (int j = i + 1; j < materials_count; j++)
+if (materials[i].get_material_quantity() < materials[j].get_material_quantity())
+Material::swap(materials[i], materials[j]);
+}
+
+void Inventory::sort_orders_by_total_price_ascending(Order *orders, const int &orders_count) {
+for (int i = 0; i < orders_count - 1; i++)
+for (int j = i + 1; j < orders_count; j++)
+if (orders[i].get_order_total_price() > orders[j].get_order_total_price())
+Order::swap(orders[i], orders[j]);
+}
+
+void Inventory::sort_orders_by_total_price_descending(Order *orders, const int &orders_count) {
+for (int i = 0; i < orders_count - 1; i++)
+for (int j = i + 1; j < orders_count; j++)
+if (orders[i].get_order_total_price() < orders[j].get_order_total_price())
+Order::swap(orders[i], orders[j]);
+}
+
+
 // MATERIALS
 
 // // Metode statice (pentru implementari si logica viitoare)

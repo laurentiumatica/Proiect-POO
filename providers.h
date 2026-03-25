@@ -1,7 +1,7 @@
 #pragma once
 #include <iosfwd>
 
-// Definim structura și comportamentul pentru clasa Provider (Furnizor)
+// Definim structura si comportamentul pentru clasa Provider (Furnizor)
 class Provider {
 public:
     // Constructorul implicit
@@ -19,45 +19,45 @@ public:
     ~Provider();
 
     // Getters
-    [[nodiscard]] char *get_provider_id() const; // Returnează un pointer către ID-ul furnizorului
-    [[nodiscard]] char *get_provider_name() const; // Returnează un pointer către numele furnizorului
-    [[nodiscard]] char *get_provider_phone() const; // Returnează numărul de telefon
-    [[nodiscard]] char *get_provider_email() const; // Returnează adresa de email
-    [[nodiscard]] char *get_provider_address() const; // Returnează adresa fizică
-    [[nodiscard]] char **get_provider_materials_id() const; // Returnează lista (tabloul de pointeri) cu ID-urile materialelor
-    [[nodiscard]] int get_provider_materials_count() const; // Returnează numărul de materiale din lista de mai sus
-    [[nodiscard]] double get_provider_discount() const; // Returnează valoarea reducerii aplicate
+    [[nodiscard]] char *get_provider_id() const; // Returneaza un pointer catre ID-ul furnizorului
+    [[nodiscard]] char *get_provider_name() const; // Returneaza un pointer catre numele furnizorului
+    [[nodiscard]] char *get_provider_phone() const; // Returneaza numarul de telefon
+    [[nodiscard]] char *get_provider_email() const; // Returneaza adresa de email
+    [[nodiscard]] char *get_provider_address() const; // Returneaza adresa fizica
+    [[nodiscard]] char **get_provider_materials_id() const; // Returneaza lista (tabloul de pointeri) cu ID-urile materialelor
+    [[nodiscard]] int get_provider_materials_count() const; // Returneaza numarul de materiale din lista de mai sus
+    [[nodiscard]] double get_provider_discount() const; // Returneaza valoarea reducerii aplicate
 
     // Setters
-    void set_provider_id(const char *new_id); // Curăță memoria veche și o alocă pe cea nouă pentru ID
-    void set_provider_name(const char *new_name); // Gestionează memoria și setează noul nume
-    void set_provider_phone(const char *new_phone); // Gestionează memoria și setează noul telefon
-    void set_provider_email(const char *new_email); // Gestionează memoria și setează noul email
-    void set_provider_address(const char *new_address); // Gestionează memoria și setează noua adresă
-    void set_provider_materials(const char **new_materials, const int &new_materials_count); // Modifică simultan pointerul către matricea de materiale și numărul de materiale
-    void set_provider_discount(const double &new_discount); // Setează o nouă valoare pentru reducere
+    void set_provider_id(const char *new_provider_id); // Curata memoria veche si o aloca pe cea noua pentru ID
+    void set_provider_name(const char *new_provider_name); // Gestioneaza memoria si seteaza noul nume
+    void set_provider_phone(const char *new_provider_phone); // Gestioneaza memoria si seteaza noul telefon
+    void set_provider_email(const char *new_provider_email); // Gestioneaza memoria si seteaza noul email
+    void set_provider_address(const char *new_provider_address); // Gestioneaza memoria si seteaza noua adresa
+    void set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count); // Modifica simultan pointerul catre matricea de materiale si numarul de materiale
+    void set_provider_discount(const double &new_provider_discount); // Seteaza o noua valoare pentru reducere
 
-    // Supraîncărcarea operatorilor de I/O
+    // Supraincarcarea operatorilor de I/O
     friend std::istream &operator>>(std::istream &is, Provider &provider);
     friend std::ostream &operator<<(std::ostream &os, const Provider &provider);
 
-    // Supraîncărcarea operatorului de atribuire
+    // Supraincarcarea operatorului de atribuire
     Provider &operator=(const Provider &other);
 
-    // Supraîncărcarea operatorilor relaționali
-    bool operator==(const Provider &other) const; // Returnează true dacă au atributele identice
-    bool operator!=(const Provider &other) const; // Returnează true dacă cel puțin un atribut diferă
+    // Supraincarcarea operatorilor relationali
+    bool operator==(const Provider &other) const; // Returneaza true daca au atributele identice
+    bool operator!=(const Provider &other) const; // Returneaza true daca cel putin un atribut difera
 
-    // Interschimbă direct stările interne ale celor două obiecte
+    // Interschimbare
     static void swap(Provider &provider1, Provider &provider2) noexcept;
 
 private:
     char *id; // ID-ul furnizorului
     char *name; // Numele furnizorului
-    char *phone; // Numărul de telefon pentru furnizor
+    char *phone; // Numarul de telefon pentru furnizor
     char *email; // Email-ul furnizorului
     char *address; // Adresa furnizorului
     char **materials_id; // Array pentru ID-urile materialelor disponibile
-    int materials_count; // Numărul de materiale furnizate de provider
+    int materials_count; // Numarul de materiale furnizate de provider
     double discount; // Procentul pentru aplicarea unei reduceri
 };
