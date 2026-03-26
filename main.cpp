@@ -6,7 +6,7 @@
  *
  * PROBLEME REZOLVATE:
  * - Monitorizare stocuri materiale
- * - Gestionare furnizori si relatiile cu acestia (discounturi, comenzi)
+ * - Gestionare furnizori si relatiile cu acestia
  * - Management complet comenzi (creare, urmarire, procesare)
  * - Raportare (valoare inventar, filtrare categorii, sortare)
  * - Actualizare automata stocuri la consum si receptie comenzi
@@ -35,8 +35,8 @@ int main() {
 
     const char *provider_1_materials[] = {"MAT-001", "MAT-003"};
     const char *provider_2_materials[] = {"MAT-002", "MAT-004"};
-    const Provider provider_1("PRV-001", "LemnPro SRL", "0721111111", "contact@lemnpro.ro", "Str. Padurii 10, Cluj", provider_1_materials, 2, 5.0);
-    const Provider provider_2("PRV-002", "MetalTech SA", "0733222222", "vanzari@metaltech.ro", "Bd. Industriei 45, Buc", provider_2_materials, 2, 3.0);
+    const Provider provider_1("PRV-001", "LemnPro SRL", "0721111111", "contact@lemnpro.ro", "Str. Padurii 10, Cluj", provider_1_materials, 2);
+    const Provider provider_2("PRV-002", "MetalTech SA", "0733222222", "vanzari@metaltech.ro", "Bd. Industriei 45, Buc", provider_2_materials, 2);
     const Provider providers[] = {provider_1, provider_2};
 
     const char *order_1_materials[] = {"MAT-001", "MAT-003"};
@@ -94,7 +94,7 @@ int main() {
     std::cout << "  Materiale dupa add: " << inventory.get_inventory_materials_count() << "\n";
 
     const char *provider_new_materials[] = {"MAT-005"};
-    const Provider provider_new("PRV-003", "AdeziviRom SRL", "0755999888", "contact@adezivrom.ro", "Str. Chimica 3, Ploiesti", provider_new_materials, 1, 6.0);
+    const Provider provider_new("PRV-003", "AdeziviRom SRL", "0755999888", "contact@adezivrom.ro", "Str. Chimica 3, Ploiesti", provider_new_materials, 1);
     inventory.add_provider(provider_new);
     std::cout << "  Furnizori dupa add: " << inventory.get_inventory_providers_count() << "\n";
 

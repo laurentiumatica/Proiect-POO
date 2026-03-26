@@ -10,8 +10,6 @@ Provider::Provider() {
     this->email = nullptr;
     this->address = nullptr;
     this->materials_id = nullptr;
-    this->materials_count = 0;
-    this->discount = 0;
 }
 
 // Pentru urmatorii constructori folosim setters pentru atribuirea valorilor deoarece implementeaza deja verificarea datelor
@@ -20,15 +18,13 @@ Provider::Provider() {
 // Constructorul cu parametri
 Provider::Provider(const char *id, const char *name, const char *phone,
                    const char *email, const char *address,
-                   const char **materials_id, const int &materials_count,
-                   const double &discount) : Provider() {
+                   const char **materials_id, const int &materials_count) : Provider() {
     set_provider_id(id);
     set_provider_name(name);
     set_provider_phone(phone);
     set_provider_email(email);
     set_provider_address(address);
     set_provider_materials(materials_id, materials_count);
-    set_provider_discount(discount);
 }
 
 // Copy constructor
@@ -39,7 +35,6 @@ Provider::Provider(const Provider &other) : Provider() {
     set_provider_email(other.email);
     set_provider_address(other.address);
     set_provider_materials(const_cast<const char **>(other.materials_id), other.materials_count);
-    set_provider_discount(other.discount);
 }
 
 // Destructorul
@@ -64,13 +59,8 @@ char *Provider::get_provider_email() const { return this->email; }
 char *Provider::get_provider_address() const { return this->address; }
 char **Provider::get_provider_materials_id() const { return this->materials_id; }
 int Provider::get_provider_materials_count() const { return this->materials_count; }
-double Provider::get_provider_discount() const { return this->discount; }
 
 // Setters
-void Provider::set_provider_discount(const double &new_provider_discount) {
-    this->discount = (new_provider_discount >= 0 && new_provider_discount <= 100) ? new_provider_discount : 0;
-}
-
 void Provider::set_provider_id(const char *new_provider_id) {
     delete[] this->id;
     this->id = (new_provider_id != nullptr)
@@ -151,10 +141,6 @@ void Provider::update_provider_address(Provider &provider, const void *new_addre
     provider.set_provider_address(static_cast<const char *>(new_address));
 }
 
-void Provider::update_provider_discount(Provider &provider, const void *new_discount) {
-    provider.set_provider_discount(*static_cast<const double *>(new_discount));
-}
-
 struct MaterialsUpdate {
     const char **new_materials_id;
     int new_materials_count;
@@ -183,7 +169,6 @@ Provider &Provider::operator=(const Provider &other) {
     set_provider_email(other.email);
     set_provider_address(other.address);
     set_provider_materials(const_cast<const char **>(other.materials_id), other.materials_count);
-    set_provider_discount(other.discount);
 
     return *this;
 }
@@ -207,7 +192,6 @@ bool Provider::operator==(const Provider &other) const {
     if (this->address != nullptr && other.address != nullptr && strcmp(this->address, other.address) != 0) return false;
 
     if (this->materials_count != other.materials_count) return false;
-    if (this->discount != other.discount) return false;
     if ((this->materials_id == nullptr) != (other.materials_id == nullptr)) return false;
     if (this->materials_id != nullptr)
         for (int i = 0; i < this->materials_count; i++) {
@@ -232,7 +216,6 @@ void Provider::swap(Provider &provider1, Provider &provider2) noexcept {
     std::swap(provider1.address, provider2.address);
     std::swap(provider1.materials_id, provider2.materials_id);
     std::swap(provider1.materials_count, provider2.materials_count);
-    std::swap(provider1.discount, provider2.discount);
 }
 
 // Supraincarcarea operatorilor de I/O
@@ -242,7 +225,6 @@ std::istream &operator>>(std::istream &is, Provider &provider) {
     char provider_phone[256];
     char provider_email[256];
     char provider_address[256];
-    double provider_discount;
     int provider_materials_count;
 
     std::cout << "Enter provider ID: ";
@@ -264,10 +246,6 @@ std::istream &operator>>(std::istream &is, Provider &provider) {
     std::cout << "Enter provider address: ";
     is >> provider_address;
     provider.set_provider_address(provider_address);
-
-    std::cout << "Enter discount: ";
-    is >> provider_discount;
-    provider.set_provider_discount(provider_discount);
 
     std::cout << "Enter number of materials: ";
     is >> provider_materials_count;
@@ -300,7 +278,6 @@ std::ostream &operator<<(std::ostream &os, const Provider &provider) {
     os << "  Phone      : " << (provider.phone ? provider.phone : "N/A") << "\n";
     os << "  Email      : " << (provider.email ? provider.email : "N/A") << "\n";
     os << "  Address    : " << (provider.address ? provider.address : "N/A") << "\n";
-    os << "  Discount   : " << provider.discount << "%\n";
     os << "  Materials  : ";
 
     // Verificam existenta materialelor pentru a le putea afisa
