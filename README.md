@@ -12,10 +12,10 @@ Reprezintă un material din inventar cu ID, nume, unitate de măsură, cantitate
 * Verifică dacă materialul este sub pragul critic.
 
 ### Clasa Provider
-Reprezintă un furnizor cu ID, nume, telefon, email, adresă, lista de materiale furnizate și discount.
+Reprezintă un furnizor cu ID, nume, telefon, email, adresă și listdia de materiale furnizate.
 
 **Operații principale:**
-* Obține/setează informațiile furnizorului (ID, nume, contact, adresă, materiale, discount).
+* Obține/setează informațiile furnizorului (ID, nume, contact, adresă, materiale).
 
 ### Clasa Order
 Reprezintă o comandă cu ID, ID furnizor, lista de materiale, cantități, preț total, dată și status.
@@ -46,7 +46,7 @@ Gestionează materialele, furnizorii și comenzile inventarului.
 ## Funcționalități principale
 
 * Crearea de materiale cu parametri personalizați (wood, metal, insulation, finishes, others).
-* Crearea de furnizori cu informații de contact și discount-uri.
+* Crearea de furnizori cu informații de contact
 * Adăugarea comenzilor de la furnizori cu liste de materiale și cantități.
 * Verificarea stocurilor și identificarea materialelor aflate sub pragul critic.
 * Gestionarea mai multor inventare cu capacități diferite.
@@ -60,5 +60,4 @@ Gestionează materialele, furnizorii și comenzile inventarului.
 
 * Categoriile de materiale sunt: wood, metal, insulation, finishes, others.
 * Statusurile comenzilor sunt: pending, delivered, cancelled, unknown.
-* Eligibilitatea pentru comenzi se bazează pe capacitățile inventarului.
 * Gestiunea memoriei: programul folosește alocare dinamică de memorie pentru string-uri și tablouri.
