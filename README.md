@@ -60,5 +60,4 @@ Gestionează materialele, furnizorii și comenzile inventarului.
 
 * Categoriile de materiale sunt: wood, metal, insulation, finishes, others.
 * Statusurile comenzilor sunt: pending, delivered, cancelled, unknown.
-* Eligibilitatea pentru comenzi se bazează pe capacitățile inventarului.
 * Gestiunea memoriei: programul folosește alocare dinamică de memorie pentru string-uri și tablouri.
