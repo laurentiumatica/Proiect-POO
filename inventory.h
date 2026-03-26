@@ -32,16 +32,6 @@ public:
     [[nodiscard]] int get_inventory_providers_count() const; // Returnează numărul efectiv de furnizori stocați în inventar
     [[nodiscard]] int get_inventory_orders_count() const; // Returnează numărul efectiv de comenzi stocate în inventar
 
-    // Setters
-    void set_inventory_id(const char *new_inventory_id);
-    void set_inventory_name(const char *new_inventory_name);
-    void set_inventory_address(const char *new_inventory_address);
-    void set_inventory_phone(const char *new_inventory_phone);
-    void set_inventory_email(const char *new_inventory_email);
-    void set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count);
-    void set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count);
-    void set_inventory_orders(const Order *new_inventory_orders, const int &new_inventory_orders_count);
-
     // Metode care modifică starea obiectului
     void add_material(const Material &material); // Adaugă o copie a obiectului material în inventar
     void add_provider(const Provider &provider); // Adaugă un nou furnizor
@@ -85,6 +75,17 @@ public:
     friend std::istream &operator>>(std::istream &is, Inventory &inventory);
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inventory);
 
+    // Functii de update
+    static void update_inventory_id(Inventory &inventory, const void *new_id);
+    static void update_inventory_name(Inventory &inventory, const void *new_name);
+    static void update_inventory_address(Inventory &inventory, const void *new_address);
+    static void update_inventory_phone(Inventory &inventory, const void *new_phone);
+    static void update_inventory_email(Inventory &inventory, const void *new_email);
+    static void update_inventory_materials(Inventory &inventory, const void *new_data);
+    static void update_inventory_providers(Inventory &inventory, const void *new_data);
+    static void update_inventory_orders(Inventory &inventory, const void *new_data);
+    static void update_inventory(Inventory &inventory, void (*func)(Inventory &, const void *), const void *new_data);
+
 private:
     char *id; // ID-ul inventarului
     char *name; // Numele inventarului
@@ -97,4 +98,14 @@ private:
     int materials_count; // Numărul efectiv de materiale din inventar
     int providers_count; // Numărul efectiv de furnizori de la care se poate comanda
     int orders_count; // Numărul efectiv de comenzi existente pentru inventar
+
+    // Setters
+    void set_inventory_id(const char *new_inventory_id);
+    void set_inventory_name(const char *new_inventory_name);
+    void set_inventory_address(const char *new_inventory_address);
+    void set_inventory_phone(const char *new_inventory_phone);
+    void set_inventory_email(const char *new_inventory_email);
+    void set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count);
+    void set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count);
+    void set_inventory_orders(const Order *new_inventory_orders, const int &new_inventory_orders_count);
 };

@@ -42,8 +42,9 @@ Order::~Order() {
     delete[] this->provider_id;
     delete[] this->date;
 
-    for (int i = 0; i < this->materials_count; i++)
-        delete[] this->materials_id[i];
+    if (this->materials_id != nullptr)
+        for (int i = 0; i < this->materials_count; i++)
+            delete[] this->materials_id[i];
 
     delete[] this->materials_id;
     delete[] this->quantities;
@@ -110,6 +111,45 @@ void Order::set_order_materials(const char **new_order_materials, const double *
     }
 }
 
+void Order::update_order_id(Order &order, const void *new_data) {
+    order.set_order_id(static_cast<const char *>(new_data));
+}
+
+void Order::update_order_provider_id(Order &order, const void *new_data) {
+    order.set_order_provider_id(static_cast<const char *>(new_data));
+}
+
+void Order::update_order_date(Order &order, const void *new_data) {
+    order.set_order_date(static_cast<const char *>(new_data));
+}
+
+void Order::update_order_total_price(Order &order, const void *new_data) {
+    order.set_order_total_price(*static_cast<const double *>(new_data));
+}
+
+void Order::update_order_status(Order &order, const void *new_data) {
+    order.set_order_status(*static_cast<const Status *>(new_data));
+}
+
+struct OrderUpdate {
+    const char **new_materials_id;
+    const double *new_quantities;
+    int new_materials_count;
+};
+
+
+void Order::update_order_materials(Order &order, const void *new_data) {
+    const auto *u = static_cast<const OrderUpdate *>(new_data);
+    order.set_order_materials(u->new_materials_id, u->new_quantities , u->new_materials_count);
+}
+
+// Functie generala de update
+void Order::update_order(Order &order, void (*func)(Order &, const void *), const void *new_value) {
+    if (func == nullptr)
+        return;
+    func(order, new_value);
+}
+
 // Supraincarcarea operatorului de atribuire
 // Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
 Order &Order::operator=(const Order &other) {
@@ -129,15 +169,12 @@ Order &Order::operator=(const Order &other) {
 // Supraincarcare operatori relationali
 // Aplicam si aici verificari ale validitatii datelor pentru a putea folosi strcmp
 bool Order::operator==(const Order &other) const {
-    // Verificare pentru id
     if ((this->id == nullptr) != (other.id == nullptr)) return false;
     if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
 
-    // Verificare pentru provider_id
     if ((this->provider_id == nullptr) != (other.provider_id == nullptr)) return false;
     if (this->provider_id != nullptr && other.provider_id != nullptr && strcmp(this->provider_id, other.provider_id) != 0) return false;
 
-    // Verificare pentru date
     if ((this->date == nullptr) != (other.date == nullptr)) return false;
     if (this->date != nullptr && other.date != nullptr && strcmp(this->date, other.date) != 0) return false;
 
@@ -146,7 +183,6 @@ bool Order::operator==(const Order &other) const {
         this->status != other.status)
         return false;
 
-    // Verificare pentru materials_id si quantities
     if ((this->materials_id == nullptr) != (other.materials_id == nullptr)) return false;
     if ((this->quantities == nullptr) != (other.quantities == nullptr)) return false;
 

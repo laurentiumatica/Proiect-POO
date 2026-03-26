@@ -94,6 +94,44 @@ void Material::set_material_category(const Category &new_material_category) {
     this->category = new_material_category;
 }
 
+// Metode auxiliare statice
+// Ele sunt apelate de functia principala de update pentru a modifica starea materialului
+// Sunt dezvoltate pentru implementari si adaptari ulterioare
+void Material::update_material_id(Material &material, const void *new_id) {
+    material.set_material_id(static_cast<const char *>(new_id));
+}
+
+void Material::update_material_name(Material &material, const void *new_name) {
+    material.set_material_name(static_cast<const char *>(new_name));
+}
+
+void Material::update_material_measure_unit(Material &material, const void *new_measure_unit) {
+    material.set_material_measure_unit(static_cast<const char *>(new_measure_unit));
+}
+
+void Material::update_material_critical(Material &material, const void *new_critical) {
+    material.set_material_critical(*static_cast<const double *>(new_critical));
+}
+
+void Material::update_material_unit_price(Material &material, const void *new_unit_price) {
+    material.set_material_unit_price(*static_cast<const double *>(new_unit_price));
+}
+
+void Material::update_material_quantity(Material &material, const void *new_quantity) {
+    material.set_material_quantity(*static_cast<const double *>(new_quantity));
+}
+
+void Material::update_material_category(Material &material, const void *new_category) {
+    material.set_material_category(*static_cast<const Category *>(new_category));
+}
+
+// Functia principala de update
+void Material::update_material(Material &material, void (*func)(Material &, const void *), const void *new_value) {
+    if (func == nullptr)
+        return;
+    func(material, new_value);
+}
+
 // Supraincarcare operator de atribuire
 // Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
 Material &Material::operator=(const Material &other) {
@@ -121,8 +159,8 @@ bool Material::operator==(const Material &other) const {
     if (this->name != nullptr && other.name != nullptr && strcmp(this->name, other.name) != 0) return false;
 
     if ((this->measure_unit == nullptr) != (other.measure_unit == nullptr)) return false;
-    if (this->measure_unit != nullptr && other.measure_unit != nullptr && strcmp(this->measure_unit, other.measure_unit)
-        != 0) return false;
+    if (this->measure_unit != nullptr && other.measure_unit != nullptr && strcmp(this->measure_unit, other.measure_unit) != 0)
+        return false;
 
     return this->quantity == other.quantity &&
            this->critical == other.critical &&
@@ -134,7 +172,7 @@ bool Material::operator!=(const Material &other) const {
     return !(*this == other);
 }
 
-//Interschimbare
+// Interschimbare
 void Material::swap(Material &material1, Material &material2) noexcept {
     std::swap(material1.id, material2.id);
     std::swap(material1.name, material2.name);

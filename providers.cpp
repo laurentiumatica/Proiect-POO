@@ -50,8 +50,9 @@ Provider::~Provider() {
     delete[] this->email;
     delete[] this->address;
 
-    for (int i = 0; i < this->materials_count; i++)
-        delete[] this->materials_id[i];
+    if (this->materials_id != nullptr)
+        for (int i = 0; i < this->materials_count; i++)
+            delete[] this->materials_id[i];
     delete[] this->materials_id;
 }
 
@@ -125,6 +126,49 @@ void Provider::set_provider_materials(const char **new_provider_materials, const
         this->materials_id = nullptr;
         this->materials_count = 0;
     }
+}
+
+// Functii de update
+// Ele sunt apelate de functia principala de update petru a modifica starea furnizorului
+// Sunt dezvoltate pentru implementari si adaptari ulterioare
+void Provider::update_provider_id(Provider &provider, const void *new_id) {
+    provider.set_provider_id(static_cast<const char *>(new_id));
+}
+
+void Provider::update_provider_name(Provider &provider, const void *new_name) {
+    provider.set_provider_name(static_cast<const char *>(new_name));
+}
+
+void Provider::update_provider_phone(Provider &provider, const void *new_phone) {
+    provider.set_provider_phone(static_cast<const char *>(new_phone));
+}
+
+void Provider::update_provider_email(Provider &provider, const void *new_email) {
+    provider.set_provider_email(static_cast<const char *>(new_email));
+}
+
+void Provider::update_provider_address(Provider &provider, const void *new_address) {
+    provider.set_provider_address(static_cast<const char *>(new_address));
+}
+
+void Provider::update_provider_discount(Provider &provider, const void *new_discount) {
+    provider.set_provider_discount(*static_cast<const double *>(new_discount));
+}
+
+struct MaterialsUpdate {
+    const char **new_materials_id;
+    int new_materials_count;
+};
+
+void Provider::update_provider_materials(Provider &provider, const void *data) {
+    const auto *u = static_cast<const MaterialsUpdate *>(data);
+    provider.set_provider_materials(u->new_materials_id, u->new_materials_count);
+}
+
+void Provider::update_provider(Provider &provider, void (*func)(Provider &, const void *), const void *new_data) {
+    if (func == nullptr)
+        return;
+    func(provider, new_data);
 }
 
 // Supraincarcarea operatorului de atribuire

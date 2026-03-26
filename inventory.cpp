@@ -144,6 +144,65 @@ void Inventory::set_inventory_orders(const Order *new_inventory_orders, const in
     }
 }
 
+// Functii de update
+// Ele sunt apelate de functia principala de update petru a modifica starea inventarului
+// Sunt dezvoltate pentru implementari si adaptari ulterioare
+void Inventory::update_inventory_id(Inventory &inventory, const void *new_id) {
+    inventory.set_inventory_id(static_cast<const char *>(new_id));
+}
+
+void Inventory::update_inventory_name(Inventory &inventory, const void *new_name) {
+    inventory.set_inventory_name(static_cast<const char *>(new_name));
+}
+
+void Inventory::update_inventory_address(Inventory &inventory, const void *new_address) {
+    inventory.set_inventory_address(static_cast<const char *>(new_address));
+}
+
+void Inventory::update_inventory_phone(Inventory &inventory, const void *new_phone) {
+    inventory.set_inventory_phone(static_cast<const char *>(new_phone));
+}
+
+void Inventory::update_inventory_email(Inventory &inventory, const void *new_email) {
+    inventory.set_inventory_email(static_cast<const char *>(new_email));
+}
+
+struct MaterialsUpdate {
+    const Material *new_materials;
+    int new_materials_count;
+};
+
+void Inventory::update_inventory_materials(Inventory &inventory, const void *new_data) {
+    const auto *u = static_cast<const MaterialsUpdate *>(new_data);
+    inventory.set_inventory_materials(u->new_materials, u->new_materials_count);
+}
+
+struct ProvidersUpdate {
+    const Provider *new_providers;
+    int new_providers_count;
+};
+
+void Inventory::update_inventory_providers(Inventory &inventory, const void *new_data) {
+    const auto *u = static_cast<const ProvidersUpdate *>(new_data);
+    inventory.set_inventory_providers(u->new_providers, u->new_providers_count);
+}
+
+struct OrdersUpdate {
+    const Order *new_orders;
+    int new_orders_count;
+};
+
+void Inventory::update_inventory_orders(Inventory &inventory, const void *new_data) {
+    const auto *u = static_cast<const OrdersUpdate *>(new_data);
+    inventory.set_inventory_orders(u->new_orders, u->new_orders_count);
+}
+
+void Inventory::update_inventory(Inventory &inventory, void (*func)(Inventory &, const void *), const void *new_data) {
+    if (func == nullptr)
+        return;
+    func(inventory, new_data);
+}
+
 // Metode care modifica starea obiectului
 void Inventory::add_material(const Material &material) {
     // Alocam memorie pentru a putea adauga noul material si copiem materialele vechi
@@ -341,7 +400,7 @@ void Inventory::consume_material(const char *material_id, const double &quantity
     if (new_quantity < 0)
         return;
 
-    material->set_material_quantity(new_quantity);
+    Material::update_material(*material, Material::update_material_quantity, &new_quantity);
 }
 
 // Receptionarea unei comenzi
@@ -376,13 +435,13 @@ void Inventory::receive_order(Order *order) {
         Material *material = this->find_material_by_id(materials_id[i]);
         if (material != nullptr) {
             double new_quantity = material->get_material_quantity() + quantities[i];
-            material->set_material_quantity(new_quantity);
+            Material::update_material(*material, Material::update_material_quantity, &new_quantity);
         }
     }
 
     // Finalizam procesul modificand state-ul obiectului Order primit la delivered
     constexpr auto new_status = Order::Status::delivered;
-    order->set_order_status(new_status);
+    Order::update_order(*order, Order::update_order_status, &new_status);
 }
 
 // Calcularea intregii valori a inventarului

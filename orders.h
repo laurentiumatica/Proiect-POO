@@ -33,14 +33,6 @@ public:
     [[nodiscard]] Status get_order_status() const; // Returneaza stadiul curent (pending, delivered etc.)
     [[nodiscard]] int get_order_materials_count() const; // Returneaza numarul de materiale din comanda
 
-    // Setters
-    void set_order_id(const char *new_order_id);
-    void set_order_provider_id(const char *new_order_provider_id);
-    void set_order_materials(const char **new_order_materials, const double *new_order_quantities, const int &new_order_materials_count);
-    void set_order_total_price(const double &new_order_total_price);
-    void set_order_date(const char *new_date);
-    void set_order_status(const Status &new_status);
-
     // Supraincarcarea operatorilor de I/O
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
     friend std::istream &operator>>(std::istream &is, Order &order);
@@ -58,6 +50,15 @@ public:
     // Interschimbare
     static void swap(Order &order1, Order &order2) noexcept;
 
+    // Functii de update
+    static void update_order_id(Order &order, const void *new_data);
+    static void update_order_provider_id(Order &order, const void *new_data);
+    static void update_order_date(Order &order, const void *new_data);
+    static void update_order_total_price(Order &order, const void *new_data);
+    static void update_order_status(Order &order, const void *new_data);
+    static void update_order_materials(Order &order, const void *new_data);
+    static void update_order(Order &order, void (*func)(Order &, const void *), const void *new_value);
+
 private:
     char *id; // ID-ul comenzii
     char *provider_id; // ID-ul furnizorului
@@ -67,4 +68,12 @@ private:
     double total_price; // Valoarea totala a comenzii
     char *date; // Data in care s-a dat comanda
     Status status; // Starea curenta a comenzii
+
+    // Setters
+    void set_order_id(const char *new_order_id);
+    void set_order_provider_id(const char *new_order_provider_id);
+    void set_order_materials(const char **new_order_materials, const double *new_order_quantities, const int &new_order_materials_count);
+    void set_order_total_price(const double &new_order_total_price);
+    void set_order_date(const char *new_order_date);
+    void set_order_status(const Status &new_order_status);
 };

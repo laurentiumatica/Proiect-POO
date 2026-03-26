@@ -28,15 +28,6 @@ public:
     [[nodiscard]] int get_provider_materials_count() const; // Returneaza numarul de materiale din lista de mai sus
     [[nodiscard]] double get_provider_discount() const; // Returneaza valoarea reducerii aplicate
 
-    // Setters
-    void set_provider_id(const char *new_provider_id); // Curata memoria veche si o aloca pe cea noua pentru ID
-    void set_provider_name(const char *new_provider_name); // Gestioneaza memoria si seteaza noul nume
-    void set_provider_phone(const char *new_provider_phone); // Gestioneaza memoria si seteaza noul telefon
-    void set_provider_email(const char *new_provider_email); // Gestioneaza memoria si seteaza noul email
-    void set_provider_address(const char *new_provider_address); // Gestioneaza memoria si seteaza noua adresa
-    void set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count); // Modifica simultan pointerul catre matricea de materiale si numarul de materiale
-    void set_provider_discount(const double &new_provider_discount); // Seteaza o noua valoare pentru reducere
-
     // Supraincarcarea operatorilor de I/O
     friend std::istream &operator>>(std::istream &is, Provider &provider);
     friend std::ostream &operator<<(std::ostream &os, const Provider &provider);
@@ -51,6 +42,16 @@ public:
     // Interschimbare
     static void swap(Provider &provider1, Provider &provider2) noexcept;
 
+    // Functii de update;
+    static void update_provider_id(Provider &provider, const void *new_id);
+    static void update_provider_name(Provider &provider, const void *new_name);
+    static void update_provider_phone(Provider &provider, const void *new_phone);
+    static void update_provider_email(Provider &provider, const void *new_email);
+    static void update_provider_address(Provider &provider, const void *new_address);
+    static void update_provider_discount(Provider &provider, const void *new_discount);
+    static void update_provider_materials(Provider &provider, const void *data);
+    static void update_provider(Provider &provider, void (*func)(Provider &, const void *), const void *new_data);
+
 private:
     char *id; // ID-ul furnizorului
     char *name; // Numele furnizorului
@@ -60,4 +61,13 @@ private:
     char **materials_id; // Array pentru ID-urile materialelor disponibile
     int materials_count; // Numarul de materiale furnizate de provider
     double discount; // Procentul pentru aplicarea unei reduceri
+
+    // Setters
+    void set_provider_id(const char *new_provider_id); // Curata memoria veche si o aloca pe cea noua pentru ID
+    void set_provider_name(const char *new_provider_name); // Gestioneaza memoria si seteaza noul nume
+    void set_provider_phone(const char *new_provider_phone); // Gestioneaza memoria si seteaza noul telefon
+    void set_provider_email(const char *new_provider_email); // Gestioneaza memoria si seteaza noul email
+    void set_provider_address(const char *new_provider_address); // Gestioneaza memoria si seteaza noua adresa
+    void set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count); // Modifica simultan pointerul catre matricea de materiale si numarul de materiale
+    void set_provider_discount(const double &new_provider_discount); // Seteaza o noua valoare pentru reducere
 };
