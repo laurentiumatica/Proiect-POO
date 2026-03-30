@@ -77,14 +77,14 @@ void Provider::set_provider_name(const char *new_provider_name) {
 
 void Provider::set_provider_phone(const char *new_provider_phone) {
     delete[] this->phone;
-    this->phone = (new_provider_phone != nullptr)
+    this->phone = (new_provider_phone != nullptr && verify_provider_phone(new_provider_phone))
                       ? (strcpy(new char[strlen(new_provider_phone) + 1], new_provider_phone))
                       : nullptr;
 }
 
 void Provider::set_provider_email(const char *new_provider_email) {
     delete[] this->email;
-    this->email = (new_provider_email != nullptr)
+    this->email = (new_provider_email != nullptr && verify_provider_email(new_provider_email))
                       ? (strcpy(new char[strlen(new_provider_email) + 1], new_provider_email))
                       : nullptr;
 }
@@ -292,4 +292,33 @@ std::ostream &operator<<(std::ostream &os, const Provider &provider) {
     os << "\n\n";
 
     return os;
+}
+
+bool Provider::verify_provider_email(const char *email) {
+    if (email == nullptr)
+        return false;
+
+    const char *at_pos = strchr(email, '@');
+    if (at_pos == nullptr || at_pos == email || at_pos >= email + strlen(email) - 1)
+        return false;
+
+    const char *dot_pos = strrchr(at_pos, '.');
+    if (dot_pos == nullptr || dot_pos == at_pos + 1 || dot_pos >= email + strlen(email) - 1)
+        return false;
+
+    return true;
+}
+
+bool Provider::verify_provider_phone(const char *phone) {
+    if (phone == nullptr)
+        return false;
+
+    if (strlen(phone) != 10)
+        return false;
+
+    for (int i = 0; i < 10; i++)
+        if (phone[i] < '0' || phone[i] > '9')
+            return false;
+
+    return true;
 }

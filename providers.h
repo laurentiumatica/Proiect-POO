@@ -66,4 +66,8 @@ private:
     void set_provider_email(const char *new_provider_email); // Gestioneaza memoria si seteaza noul email
     void set_provider_address(const char *new_provider_address); // Gestioneaza memoria si seteaza noua adresa
     void set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count); // Modifica simultan pointerul catre matricea de materiale si numarul de materiale
+
+    // Functii helper
+    static bool verify_provider_phone(const char *phone);
+    static bool verify_provider_email(const char *email);
 };

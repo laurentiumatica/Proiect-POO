@@ -70,30 +70,41 @@ int Inventory::get_inventory_orders_count() const { return this->orders_count; }
 
 void Inventory::set_inventory_id(const char *new_inventory_id) {
     delete[] this->id;
-    this->id = (new_inventory_id != nullptr) ? strcpy(new char[strlen(new_inventory_id)+1],new_inventory_id) : nullptr;
+    this->id = (new_inventory_id != nullptr)
+        ? strcpy(new char[strlen(new_inventory_id) + 1], new_inventory_id)
+        : nullptr;
 }
 
 void Inventory::set_inventory_name(const char *new_inventory_name) {
     delete[] this->name;
-    this->name = (new_inventory_name != nullptr) ? strcpy(new char[strlen(new_inventory_name)+1],new_inventory_name) : nullptr;
+    this->name = (new_inventory_name != nullptr)
+        ? strcpy(new char[strlen(new_inventory_name) + 1], new_inventory_name)
+        : nullptr;
 }
 
 void Inventory::set_inventory_address(const char *new_inventory_address) {
     delete[] this->address;
-    this->address = (new_inventory_address != nullptr) ? strcpy(new char[strlen(new_inventory_address)+1],new_inventory_address) : nullptr;
+    this->address = (new_inventory_address != nullptr)
+        ? strcpy(new char[strlen(new_inventory_address) + 1], new_inventory_address)
+        : nullptr;
 }
 
 void Inventory::set_inventory_phone(const char *new_inventory_phone) {
     delete[] this->phone;
-    this->phone = (new_inventory_phone != nullptr) ? strcpy(new char[strlen(new_inventory_phone)+1],new_inventory_phone) : nullptr;
+    this->phone = (new_inventory_phone != nullptr && verify_inventory_phone(new_inventory_phone))
+        ? strcpy(new char[strlen(new_inventory_phone) + 1], new_inventory_phone)
+        : nullptr;
 }
 
 void Inventory::set_inventory_email(const char *new_inventory_email) {
     delete[] this->email;
-    this->email = (new_inventory_email != nullptr) ? strcpy(new char[strlen(new_inventory_email)+1],new_inventory_email) : nullptr;
+    this->email = (new_inventory_email != nullptr && verify_inventory_email(new_inventory_email))
+        ? strcpy(new char[strlen(new_inventory_email) + 1], new_inventory_email)
+        : nullptr;
 }
 
-void Inventory::set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count) {
+void Inventory::set_inventory_materials(const Material *new_inventory_materials,
+                                        const int &new_inventory_materials_count) {
     // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
     delete[] this->materials;
 
@@ -103,14 +114,14 @@ void Inventory::set_inventory_materials(const Material *new_inventory_materials,
         this->materials = new Material[this->materials_count];
         for (int i = 0; i < this->materials_count; i++)
             this->materials[i] = new_inventory_materials[i];
-    }
-    else {
+    } else {
         this->materials = nullptr;
         this->materials_count = 0;
     }
 }
 
-void Inventory::set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count) {
+void Inventory::set_inventory_providers(const Provider *new_inventory_providers,
+                                        const int &new_inventory_providers_count) {
     // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
     delete[] this->providers;
 
@@ -120,8 +131,7 @@ void Inventory::set_inventory_providers(const Provider *new_inventory_providers,
         this->providers = new Provider [this->providers_count];
         for (int i = 0; i < this->providers_count; i++)
             this->providers[i] = new_inventory_providers[i];
-    }
-    else {
+    } else {
         this->providers = nullptr;
         this->providers_count = 0;
     }
@@ -137,8 +147,7 @@ void Inventory::set_inventory_orders(const Order *new_inventory_orders, const in
         this->orders = new Order [this->orders_count];
         for (int i = 0; i < this->orders_count; i++)
             this->orders[i] = new_inventory_orders[i];
-    }
-    else {
+    } else {
         this->orders = nullptr;
         this->orders_count = 0;
     }
@@ -273,8 +282,7 @@ void Inventory::sort_materials_by_name_ascending() {
             if (material_name_i != nullptr && material_name_j != nullptr) {
                 if (strcmp(material_name_i, material_name_j) > 0)
                     Material::swap(this->materials[i], this->materials[j]);
-            }
-            else if (material_name_i == nullptr && material_name_j != nullptr)
+            } else if (material_name_i == nullptr && material_name_j != nullptr)
                 Material::swap(this->materials[i], this->materials[j]);
         }
 }
@@ -287,8 +295,7 @@ void Inventory::sort_materials_by_name_descending() {
             if (material_name_i != nullptr && material_name_j != nullptr) {
                 if (strcmp(material_name_i, material_name_j) < 0)
                     Material::swap(this->materials[i], this->materials[j]);
-            }
-            else if (material_name_i == nullptr && material_name_j != nullptr)
+            } else if (material_name_i == nullptr && material_name_j != nullptr)
                 Material::swap(this->materials[i], this->materials[j]);
         }
 }
@@ -328,7 +335,7 @@ Order *Inventory::get_orders_by_provider_id(const char *provider_id, int &result
         return nullptr;
     }
 
-    const auto *to_search_orders= this->get_inventory_orders();
+    const auto *to_search_orders = this->get_inventory_orders();
     result_count = 0;
     for (int i = 0; i < this->orders_count; i++)
         if (to_search_orders[i].get_order_provider_id() != nullptr && strcmp(to_search_orders[i].get_order_provider_id(), provider_id) == 0)
@@ -590,4 +597,33 @@ std::ostream &operator<<(std::ostream &os, const Inventory &inventory) {
     os << "  Orders     : " << inventory.orders_count << "\n\n";
 
     return os;
+}
+
+bool Inventory::verify_inventory_email(const char *email) {
+    if (email == nullptr)
+        return false;
+
+    const char *at_pos = strchr(email, '@');
+    if (at_pos == nullptr || at_pos == email || at_pos >= email + strlen(email) - 1)
+        return false;
+
+    const char *dot_pos = strrchr(at_pos, '.');
+    if (dot_pos == nullptr || dot_pos == at_pos + 1 || dot_pos >= email + strlen(email) - 1)
+        return false;
+
+    return true;
+}
+
+bool Inventory::verify_inventory_phone(const char *phone) {
+    if (phone == nullptr)
+        return false;
+
+    if (strlen(phone) != 10)
+        return false;
+
+    for (int i = 0; i < 10; i++)
+        if (phone[i] < '0' || phone[i] > '9')
+            return false;
+
+    return true;
 }

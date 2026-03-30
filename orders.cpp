@@ -17,7 +17,8 @@ Order::Order() {
 // Constructorul cu parametri
 Order::Order(const char *id, const char *provider_id, const char **materials_id,
              const int &materials_count, const double *quantities,
-             const double &total_price, const char *date, const Status &status) : Order() {
+             const double &total_price, const char *date, const Status &status)
+    : Order() {
     set_order_id(id);
     set_order_provider_id(provider_id);
     set_order_materials(materials_id, quantities, materials_count);
@@ -71,20 +72,28 @@ void Order::set_order_total_price(const double &new_order_total_price) {
 
 void Order::set_order_id(const char *new_order_id) {
     delete[] this->id;
-    this->id = (new_order_id != nullptr) ? strcpy(new char[strlen(new_order_id) + 1], new_order_id) : nullptr;
+    this->id = (new_order_id != nullptr)
+        ? strcpy(new char[strlen(new_order_id) + 1], new_order_id)
+        : nullptr;
 }
 
 void Order::set_order_provider_id(const char *new_order_provider_id) {
     delete[] this->provider_id;
-    this->provider_id = (new_order_provider_id != nullptr) ? strcpy(new char[strlen(new_order_provider_id) + 1], new_order_provider_id) : nullptr;
+    this->provider_id = (new_order_provider_id != nullptr)
+        ? strcpy(new char[strlen(new_order_provider_id) + 1], new_order_provider_id)
+        : nullptr;
 }
 
 void Order::set_order_date(const char *new_order_date) {
     delete[] this->date;
-    this->date = (new_order_date != nullptr) ? strcpy(new char[strlen(new_order_date) + 1], new_order_date) : nullptr;
+    this->date = (new_order_date != nullptr && verify_order_date(new_order_date))
+        ? strcpy(new char[strlen(new_order_date) + 1], new_order_date)
+        : nullptr;
 }
 
-void Order::set_order_materials(const char **new_order_materials, const double *new_order_quantities, const int &new_order_materials_count) {
+void Order::set_order_materials(const char **new_order_materials,
+                                const double *new_order_quantities,
+                                const int &new_order_materials_count) {
     // Stergem memoria alocata anterior
     if (materials_id != nullptr)
         for (int i = 0; i < this->materials_count; i++)
@@ -92,15 +101,17 @@ void Order::set_order_materials(const char **new_order_materials, const double *
     delete[] this->materials_id;
     delete[] this->quantities;
 
-    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se poate
+    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se
+    // poate
     this->materials_count = (new_order_materials_count >= 0) ? new_order_materials_count : 0;
-    if (this->materials_count > 0 && new_order_materials != nullptr && new_order_quantities != nullptr) {
+    if (this->materials_count > 0 && new_order_materials != nullptr &&
+        new_order_quantities != nullptr) {
         this->materials_id = new char *[this->materials_count];
         this->quantities = new double[this->materials_count];
         for (int i = 0; i < this->materials_count; i++) {
             this->materials_id[i] = (new_order_materials[i] != nullptr)
-                                        ? (strcpy(new char[strlen(new_order_materials[i]) + 1], new_order_materials[i]))
-                                        : nullptr;
+                ? (strcpy(new char[strlen(new_order_materials[i]) + 1], new_order_materials[i]))
+                : nullptr;
             this->quantities[i] = new_order_quantities[i] >= 0 ? new_order_quantities[i] : 0;
         }
     } else {
@@ -137,10 +148,9 @@ struct OrderUpdate {
     int new_materials_count;
 };
 
-
 void Order::update_order_materials(Order &order, const void *new_data) {
     const auto *u = static_cast<const OrderUpdate *>(new_data);
-    order.set_order_materials(u->new_materials_id, u->new_quantities , u->new_materials_count);
+    order.set_order_materials(u->new_materials_id, u->new_quantities, u->new_materials_count);
 }
 
 // Functie generala de update
@@ -151,7 +161,8 @@ void Order::update_order(Order &order, void (*func)(Order &, const void *), cons
 }
 
 // Supraincarcarea operatorului de atribuire
-// Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
+// Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem
+// garantia constructorilor ca putem sterge zonele de memorie alocate
 Order &Order::operator=(const Order &other) {
     if (this == &other)
         return *this;
@@ -167,39 +178,46 @@ Order &Order::operator=(const Order &other) {
 }
 
 // Supraincarcare operatori relationali
-// Aplicam si aici verificari ale validitatii datelor pentru a putea folosi strcmp
+// Aplicam si aici verificari ale validitatii datelor pentru a putea folosi
+// strcmp
 bool Order::operator==(const Order &other) const {
-    if ((this->id == nullptr) != (other.id == nullptr)) return false;
-    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
-
-    if ((this->provider_id == nullptr) != (other.provider_id == nullptr)) return false;
-    if (this->provider_id != nullptr && other.provider_id != nullptr && strcmp(this->provider_id, other.provider_id) != 0) return false;
-
-    if ((this->date == nullptr) != (other.date == nullptr)) return false;
-    if (this->date != nullptr && other.date != nullptr && strcmp(this->date, other.date) != 0) return false;
-
-    if (this->materials_count != other.materials_count ||
-        this->total_price != other.total_price ||
-        this->status != other.status)
+    if ((this->id == nullptr) != (other.id == nullptr))
+        return false;
+    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0)
         return false;
 
-    if ((this->materials_id == nullptr) != (other.materials_id == nullptr)) return false;
-    if ((this->quantities == nullptr) != (other.quantities == nullptr)) return false;
+    if ((this->provider_id == nullptr) != (other.provider_id == nullptr))
+        return false;
+    if (this->provider_id != nullptr && other.provider_id != nullptr && strcmp(this->provider_id, other.provider_id) != 0)
+        return false;
 
-    if (this->materials_id != nullptr && this->quantities != nullptr &&
-        other.materials_id != nullptr && other.quantities != nullptr)
+    if ((this->date == nullptr) != (other.date == nullptr))
+        return false;
+    if (this->date != nullptr && other.date != nullptr && strcmp(this->date, other.date) != 0)
+        return false;
+
+    if (this->materials_count != other.materials_count || this->total_price != other.total_price || this->status != other.status)
+        return false;
+
+    if ((this->materials_id == nullptr) != (other.materials_id == nullptr))
+        return false;
+    if ((this->quantities == nullptr) != (other.quantities == nullptr))
+        return false;
+
+    if (this->materials_id != nullptr && this->quantities != nullptr && other.materials_id != nullptr && other.quantities != nullptr)
         for (int i = 0; i < this->materials_count; i++) {
-            if ((this->materials_id[i] == nullptr) != (other.materials_id[i] == nullptr)) return false;
-            if (this->materials_id[i] != nullptr && other.materials_id[i] != nullptr && strcmp(this->materials_id[i], other.materials_id[i]) != 0) return false;
-            if (this->quantities[i] != other.quantities[i]) return false;
+            if ((this->materials_id[i] == nullptr) != (other.materials_id[i] == nullptr))
+                return false;
+            if (this->materials_id[i] != nullptr && other.materials_id[i] != nullptr && strcmp(this->materials_id[i], other.materials_id[i]) != 0)
+                return false;
+            if (this->quantities[i] != other.quantities[i])
+                return false;
         }
 
     return true;
 }
 
-bool Order::operator!=(const Order &other) const {
-    return !(*this == other);
-}
+bool Order::operator!=(const Order &other) const { return !(*this == other); }
 
 // Interschimbare
 void Order::swap(Order &order1, Order &order2) noexcept {
@@ -263,7 +281,8 @@ std::istream &operator>>(std::istream &is, Order &order) {
             is >> order_quantities[i];
         }
 
-        order.set_order_materials(const_cast<const char **>(order_materials_id), order_quantities, order_materials_count);
+        order.set_order_materials(const_cast<const char **>(order_materials_id),
+                                  order_quantities, order_materials_count);
 
         for (int i = 0; i < order_materials_count; i++)
             delete[] order_materials_id[i];
@@ -308,4 +327,34 @@ const char *Order::order_status_to_string(const Status &status) {
         default:
             return "unknown";
     }
+}
+
+// Functie helper pentru verificarea validitatii datei
+bool Order::verify_order_date(const char *date) {
+    if (date == nullptr)
+        return false;
+
+    int day, month, year;
+    if (sscanf(date, "%d-%d-%d", &day, &month, &year) != 3)
+        return false;
+
+    if (year < 2026)
+        return false;
+
+    if (month < 1 || month > 12)
+        return false;
+
+    if (day < 1 || day > 31)
+        return false;
+
+    if (month == 2 && day > 29)
+        return false;
+
+    if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30)
+        return false;
+
+    if (!((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) && month == 2 && day > 28)
+        return false;
+
+    return true;
 }

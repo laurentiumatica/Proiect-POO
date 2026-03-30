@@ -108,4 +108,8 @@ private:
     void set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count);
     void set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count);
     void set_inventory_orders(const Order *new_inventory_orders, const int &new_inventory_orders_count);
+
+    // Functii helper
+    static bool verify_inventory_phone(const char *phone);
+    static bool verify_inventory_email(const char *email);
 };
