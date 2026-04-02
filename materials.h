@@ -71,7 +71,7 @@ private:
     void set_material_name(const char *new_material_name); // Aloca memorie si actualizeaza numele
     void set_material_measure_unit(const char *new_material_measure_unit); // Aloca memorie si actualizeaza unitatea de masura
     void set_material_critical(const double &new_material_critical); // Actualizeaza limita critica
-    void set_material_unit_price(const double &new_unit_price); // Actualizeaza pretul unitar
+    void set_material_unit_price(const double &new_material_unit_price); // Actualizeaza pretul unitar
     void set_material_quantity(const double &new_material_quantity); // Actualizeaza cantitatea
     void set_material_category(const Category &new_material_category); // Actualizeaza categoria
 };

@@ -103,8 +103,7 @@ void Inventory::set_inventory_email(const char *new_inventory_email) {
         : nullptr;
 }
 
-void Inventory::set_inventory_materials(const Material *new_inventory_materials,
-                                        const int &new_inventory_materials_count) {
+void Inventory::set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count) {
     // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
     delete[] this->materials;
 
@@ -120,8 +119,7 @@ void Inventory::set_inventory_materials(const Material *new_inventory_materials,
     }
 }
 
-void Inventory::set_inventory_providers(const Provider *new_inventory_providers,
-                                        const int &new_inventory_providers_count) {
+void Inventory::set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count) {
     // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
     delete[] this->providers;
 
@@ -329,7 +327,7 @@ void Inventory::sort_orders_by_total_price_descending() {
 }
 
 // Extragerea comenzilor in functie de ID-ul furnizorului
-Order *Inventory::get_orders_by_provider_id(const char *provider_id, int &result_count) const {
+Order *Inventory::get_orders_by_provider_id(const char *provider_id, int &result_count) {
     if (provider_id == nullptr) {
         result_count = 0;
         return nullptr;
@@ -354,7 +352,7 @@ Order *Inventory::get_orders_by_provider_id(const char *provider_id, int &result
 }
 
 // Extragerea materialelor care au un stoc critic
-Material *Inventory::get_critical_materials(int &result_count) const {
+Material *Inventory::get_critical_materials(int &result_count) {
     result_count = 0;
     auto const *to_search_materials = this->get_inventory_materials();
     for (int i = 0; i < this->get_inventory_materials_count(); i++)
@@ -374,7 +372,7 @@ Material *Inventory::get_critical_materials(int &result_count) const {
 }
 
 // Extragerea elementelor care fac parte dintr-o categorie anume
-Material *Inventory::get_materials_by_category(const Material::Category &category, int &result_count) const {
+Material *Inventory::get_materials_by_category(const Material::Category &category, int &result_count) {
     result_count = 0;
     auto const *to_search_materials = this->get_inventory_materials();
 

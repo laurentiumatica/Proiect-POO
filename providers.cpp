@@ -10,6 +10,7 @@ Provider::Provider() {
     this->email = nullptr;
     this->address = nullptr;
     this->materials_id = nullptr;
+    this->materials_count = 0;
 }
 
 // Pentru urmatorii constructori folosim setters pentru atribuirea valorilor deoarece implementeaza deja verificarea datelor
@@ -64,36 +65,36 @@ int Provider::get_provider_materials_count() const { return this->materials_coun
 void Provider::set_provider_id(const char *new_provider_id) {
     delete[] this->id;
     this->id = (new_provider_id != nullptr)
-                   ? (strcpy(new char[strlen(new_provider_id) + 1], new_provider_id))
-                   : nullptr;
+        ? (strcpy(new char[strlen(new_provider_id) + 1], new_provider_id))
+        : nullptr;
 }
 
 void Provider::set_provider_name(const char *new_provider_name) {
     delete[] this->name;
     this->name = (new_provider_name != nullptr)
-                     ? (strcpy(new char[strlen(new_provider_name) + 1], new_provider_name))
-                     : nullptr;
+        ? (strcpy(new char[strlen(new_provider_name) + 1], new_provider_name))
+        : nullptr;
 }
 
 void Provider::set_provider_phone(const char *new_provider_phone) {
     delete[] this->phone;
     this->phone = (new_provider_phone != nullptr && verify_provider_phone(new_provider_phone))
-                      ? (strcpy(new char[strlen(new_provider_phone) + 1], new_provider_phone))
-                      : nullptr;
+        ? (strcpy(new char[strlen(new_provider_phone) + 1], new_provider_phone))
+        : nullptr;
 }
 
 void Provider::set_provider_email(const char *new_provider_email) {
     delete[] this->email;
     this->email = (new_provider_email != nullptr && verify_provider_email(new_provider_email))
-                      ? (strcpy(new char[strlen(new_provider_email) + 1], new_provider_email))
-                      : nullptr;
+        ? (strcpy(new char[strlen(new_provider_email) + 1], new_provider_email))
+        : nullptr;
 }
 
 void Provider::set_provider_address(const char *new_provider_address) {
     delete[] this->address;
     this->address = (new_provider_address != nullptr)
-                        ? (strcpy(new char[strlen(new_provider_address) + 1], new_provider_address))
-                        : nullptr;
+        ? (strcpy(new char[strlen(new_provider_address) + 1], new_provider_address))
+        : nullptr;
 }
 
 void Provider::set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count) {
@@ -109,8 +110,8 @@ void Provider::set_provider_materials(const char **new_provider_materials, const
         this->materials_id = new char *[this->materials_count];
         for (int i = 0; i < this->materials_count; i++)
             this->materials_id[i] = (new_provider_materials[i] != nullptr)
-                                        ? (strcpy(new char[strlen(new_provider_materials[i]) + 1], new_provider_materials[i]))
-                                        : nullptr;
+                ? (strcpy(new char[strlen(new_provider_materials[i]) + 1], new_provider_materials[i]))
+                : nullptr;
     } else {
         // Altfel declaram inexistenta materialelor
         this->materials_id = nullptr;

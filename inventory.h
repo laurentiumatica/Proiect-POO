@@ -60,9 +60,9 @@ public:
     // Filtre
     // Creează și returnează un nou tablou de obiecte care respectă anumite criterii
     // Variabila result_count transmisă prin referință va fi modificată pentru a reflecta dimensiunea noului tablou returnat
-    [[nodiscard]] Order *get_orders_by_provider_id(const char *provider_id, int &result_count) const;
-    [[nodiscard]] Material *get_critical_materials(int &result_count) const;
-    [[nodiscard]] Material *get_materials_by_category(const Material::Category &category, int &result_count) const;
+    [[nodiscard]] Order *get_orders_by_provider_id(const char *provider_id, int &result_count);
+    [[nodiscard]] Material *get_critical_materials(int &result_count);
+    [[nodiscard]] Material *get_materials_by_category(const Material::Category &category, int &result_count);
 
     // Supraîncărcarea operatorului de atribuire
     Inventory &operator=(const Inventory &other);

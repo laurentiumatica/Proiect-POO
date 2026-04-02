@@ -11,7 +11,7 @@ Order::Order() {
     this->date = nullptr;
     this->materials_count = 0;
     this->total_price = 0;
-    this->status = Status::pending;
+    this->status = Status::unknown;
 }
 
 // Constructorul cu parametri
@@ -104,8 +104,7 @@ void Order::set_order_materials(const char **new_order_materials,
     // Verificam posibilitatea de copiere a noilor valori si efectuam daca se
     // poate
     this->materials_count = (new_order_materials_count >= 0) ? new_order_materials_count : 0;
-    if (this->materials_count > 0 && new_order_materials != nullptr &&
-        new_order_quantities != nullptr) {
+    if (this->materials_count > 0 && new_order_materials != nullptr && new_order_quantities != nullptr) {
         this->materials_id = new char *[this->materials_count];
         this->quantities = new double[this->materials_count];
         for (int i = 0; i < this->materials_count; i++) {
@@ -181,43 +180,33 @@ Order &Order::operator=(const Order &other) {
 // Aplicam si aici verificari ale validitatii datelor pentru a putea folosi
 // strcmp
 bool Order::operator==(const Order &other) const {
-    if ((this->id == nullptr) != (other.id == nullptr))
-        return false;
-    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0)
-        return false;
+    if ((this->id == nullptr) != (other.id == nullptr)) return false;
+    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
 
-    if ((this->provider_id == nullptr) != (other.provider_id == nullptr))
-        return false;
-    if (this->provider_id != nullptr && other.provider_id != nullptr && strcmp(this->provider_id, other.provider_id) != 0)
-        return false;
+    if ((this->provider_id == nullptr) != (other.provider_id == nullptr)) return false;
+    if (this->provider_id != nullptr && other.provider_id != nullptr && strcmp(this->provider_id, other.provider_id) != 0) return false;
 
-    if ((this->date == nullptr) != (other.date == nullptr))
-        return false;
-    if (this->date != nullptr && other.date != nullptr && strcmp(this->date, other.date) != 0)
-        return false;
+    if ((this->date == nullptr) != (other.date == nullptr)) return false;
+    if (this->date != nullptr && other.date != nullptr && strcmp(this->date, other.date) != 0) return false;
 
-    if (this->materials_count != other.materials_count || this->total_price != other.total_price || this->status != other.status)
-        return false;
+    if (this->materials_count != other.materials_count || this->total_price != other.total_price || this->status != other.status) return false;
 
-    if ((this->materials_id == nullptr) != (other.materials_id == nullptr))
-        return false;
-    if ((this->quantities == nullptr) != (other.quantities == nullptr))
-        return false;
+    if ((this->materials_id == nullptr) != (other.materials_id == nullptr)) return false;
+    if ((this->quantities == nullptr) != (other.quantities == nullptr)) return false;
 
     if (this->materials_id != nullptr && this->quantities != nullptr && other.materials_id != nullptr && other.quantities != nullptr)
         for (int i = 0; i < this->materials_count; i++) {
-            if ((this->materials_id[i] == nullptr) != (other.materials_id[i] == nullptr))
-                return false;
-            if (this->materials_id[i] != nullptr && other.materials_id[i] != nullptr && strcmp(this->materials_id[i], other.materials_id[i]) != 0)
-                return false;
-            if (this->quantities[i] != other.quantities[i])
-                return false;
+            if ((this->materials_id[i] == nullptr) != (other.materials_id[i] == nullptr)) return false;
+            if (this->materials_id[i] != nullptr && other.materials_id[i] != nullptr && strcmp(this->materials_id[i], other.materials_id[i]) != 0) return false;
+            if (this->quantities[i] != other.quantities[i]) return false;
         }
 
     return true;
 }
 
-bool Order::operator!=(const Order &other) const { return !(*this == other); }
+bool Order::operator!=(const Order &other) const {
+    return !(*this == other);
+}
 
 // Interschimbare
 void Order::swap(Order &order1, Order &order2) noexcept {
@@ -281,8 +270,7 @@ std::istream &operator>>(std::istream &is, Order &order) {
             is >> order_quantities[i];
         }
 
-        order.set_order_materials(const_cast<const char **>(order_materials_id),
-                                  order_quantities, order_materials_count);
+        order.set_order_materials(const_cast<const char **>(order_materials_id), order_quantities, order_materials_count);
 
         for (int i = 0; i < order_materials_count; i++)
             delete[] order_materials_id[i];

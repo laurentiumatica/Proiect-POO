@@ -60,22 +60,22 @@ Material::Category Material::get_material_category() const { return this->catego
 void Material::set_material_id(const char *new_material_id) {
     delete[] this->id;
     this->id = (new_material_id != nullptr)
-                   ? (strcpy(new char[strlen(new_material_id) + 1], new_material_id))
-                   : nullptr;
+        ? (strcpy(new char[strlen(new_material_id) + 1], new_material_id))
+        : nullptr;
 }
 
 void Material::set_material_name(const char *new_material_name) {
     delete[] this->name;
     this->name = (new_material_name != nullptr)
-                     ? (strcpy(new char[strlen(new_material_name) + 1], new_material_name))
-                     : nullptr;
+        ? (strcpy(new char[strlen(new_material_name) + 1], new_material_name))
+        : nullptr;
 }
 
 void Material::set_material_measure_unit(const char *new_material_measure_unit) {
     delete[] this->measure_unit;
     this->measure_unit = (new_material_measure_unit != nullptr)
-                             ? (strcpy(new char[strlen(new_material_measure_unit) + 1], new_material_measure_unit))
-                             : nullptr;
+        ? (strcpy(new char[strlen(new_material_measure_unit) + 1], new_material_measure_unit))
+        : nullptr;
 }
 
 void Material::set_material_critical(const double &new_material_critical) {
