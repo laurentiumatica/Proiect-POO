@@ -1,171 +1,104 @@
 #include "materials.h"
-#include <cstring>
 #include <iostream>
+#include <string>
+#include <cmath>
+#include <iomanip>
 
 // Constructorul default
-Material::Material() {
-    this->id = nullptr;
-    this->name = nullptr;
-    this->measure_unit = nullptr;
-    this->quantity = 0;
-    this->critical = 0;
-    this->unit_price = 0;
-    this->category = Category::others;
-}
-
-// Pentru urmatorii constructori folosim setters pentru atribuirea valorilor deoarece implementeaza deja verificarea datelor
-// De asemenea initializam pointerii la nullptr pentru a preveni stergerea memoriei de la adrese invalide
+Material::Material(): quantity(0), critical(0), unit_price(0), category(Category::others) { }
 
 // Constructorul cu parametri
-Material::Material(const char *id, const char *name, const char *measure_unit,
-                   const double &quantity, const double &critical,
-                   const double &unit_price, const Category &category) : Material() {
-    set_material_id(id);
-    set_material_name(name);
-    set_material_measure_unit(measure_unit);
-    set_material_quantity(quantity);
-    set_material_critical(critical);
-    set_material_unit_price(unit_price);
-    set_material_category(category);
+Material::Material(std::string new_material_id, std::string new_material_name, std::string new_material_measure_unit, const double new_material_quantity, const double new_material_critical, const double new_material_unit_price, const Category new_material_category)
+    : id(std::move(new_material_id)), name(std::move(new_material_name)), measure_unit(std::move(new_material_measure_unit)), quantity(new_material_quantity), critical(new_material_critical), unit_price(new_material_unit_price), category(new_material_category) {
+    if (this->id.empty()) throw std::invalid_argument("ID must be non-empty");
+    if (this->name.empty()) throw std::invalid_argument("Name must be non-empty");
+    if (this->measure_unit.empty()) throw std::invalid_argument("Measure unit must be non-empty");
+    if (this->quantity < 0) throw std::invalid_argument("Quantity must be greater than 0");
+    if (this->critical < 0) throw std::invalid_argument("Critical level must be greater than 0");
+    if (this->unit_price < 0) throw std::invalid_argument("Unit price must be greater than 0");
 }
 
 // Copy constructorul
-Material::Material(const Material &other) : Material() {
-    set_material_id(other.id);
-    set_material_name(other.name);
-    set_material_measure_unit(other.measure_unit);
-    set_material_quantity(other.quantity);
-    set_material_critical(other.critical);
-    set_material_unit_price(other.unit_price);
-    set_material_category(other.category);
-}
+Material::Material(const Material &other) : Material(other.id, other.name, other.measure_unit, other.quantity, other.critical, other.unit_price, other.category) { }
 
 // Destructor
-Material::~Material() {
-    delete[] this->id;
-    delete[] this->name;
-    delete[] this->measure_unit;
-}
+Material::~Material() = default;
 
 // Getters
-char *Material::get_material_id() const { return this->id; }
-char *Material::get_material_name() const { return this->name; }
-char *Material::get_material_measure_unit() const { return this->measure_unit; }
-double Material::get_material_critical() const { return this->critical; }
-double Material::get_material_unit_price() const { return this->unit_price; }
-double Material::get_material_quantity() const { return this->quantity; }
-Material::Category Material::get_material_category() const { return this->category; }
+const std::string &Material::get_material_id() const { return id; }
+const std::string &Material::get_material_name() const { return name; }
+const std::string &Material::get_material_measure_unit() const { return measure_unit; }
+double Material::get_material_critical() const { return critical; }
+double Material::get_material_unit_price() const { return unit_price; }
+double Material::get_material_quantity() const { return quantity; }
+Material::Category Material::get_material_category() const { return category; }
 
 // Setters
-void Material::set_material_id(const char *new_material_id) {
-    delete[] this->id;
-    this->id = (new_material_id != nullptr)
-        ? (strcpy(new char[strlen(new_material_id) + 1], new_material_id))
-        : nullptr;
+void Material::set_material_id(std::string new_material_id) {
+    if (new_material_id.empty())
+        throw std::invalid_argument("ID must be non-empty");
+    id=std::move(new_material_id);
+}
+void Material::set_material_name(std::string new_material_name) {
+    if (new_material_name.empty())
+        throw std::invalid_argument("Name must be non-empty");
+    name = std::move(new_material_name);
+}
+void Material::set_material_measure_unit(std::string new_material_measure_unit) {
+    if (new_material_measure_unit.empty())
+        throw std::invalid_argument("Measure unit must be non-empty");
+    measure_unit = std::move(new_material_measure_unit);
+}
+void Material::set_material_critical(const double new_material_critical) {
+    if (new_material_critical < 0)
+        throw std::invalid_argument("Critical level must be greater than 0");
+    critical = new_material_critical;
 }
 
-void Material::set_material_name(const char *new_material_name) {
-    delete[] this->name;
-    this->name = (new_material_name != nullptr)
-        ? (strcpy(new char[strlen(new_material_name) + 1], new_material_name))
-        : nullptr;
+void Material::set_material_unit_price(const double new_material_unit_price) {
+    if (new_material_unit_price < 0)
+        throw std::invalid_argument("Unit price must be greater than 0");
+    unit_price = new_material_unit_price;
 }
 
-void Material::set_material_measure_unit(const char *new_material_measure_unit) {
-    delete[] this->measure_unit;
-    this->measure_unit = (new_material_measure_unit != nullptr)
-        ? (strcpy(new char[strlen(new_material_measure_unit) + 1], new_material_measure_unit))
-        : nullptr;
+void Material::set_material_quantity(const double new_material_quantity) {
+    if (new_material_quantity < 0)
+        throw std::invalid_argument("Quantity must be greater than 0");
+    quantity = new_material_quantity;
 }
 
-void Material::set_material_critical(const double &new_material_critical) {
-    this->critical = (new_material_critical >= 0) ? new_material_critical : 0;
-}
-
-void Material::set_material_unit_price(const double &new_material_unit_price) {
-    this->unit_price = (new_material_unit_price >= 0) ? new_material_unit_price : 0;
-}
-
-void Material::set_material_quantity(const double &new_material_quantity) {
-    this->quantity = (new_material_quantity >= 0) ? new_material_quantity : 0;
-}
-
-void Material::set_material_category(const Category &new_material_category) {
-    this->category = new_material_category;
-}
-
-// Metode auxiliare statice
-// Ele sunt apelate de functia principala de update pentru a modifica starea materialului
-// Sunt dezvoltate pentru implementari si adaptari ulterioare
-void Material::update_material_id(Material &material, const void *new_id) {
-    material.set_material_id(static_cast<const char *>(new_id));
-}
-
-void Material::update_material_name(Material &material, const void *new_name) {
-    material.set_material_name(static_cast<const char *>(new_name));
-}
-
-void Material::update_material_measure_unit(Material &material, const void *new_measure_unit) {
-    material.set_material_measure_unit(static_cast<const char *>(new_measure_unit));
-}
-
-void Material::update_material_critical(Material &material, const void *new_critical) {
-    material.set_material_critical(*static_cast<const double *>(new_critical));
-}
-
-void Material::update_material_unit_price(Material &material, const void *new_unit_price) {
-    material.set_material_unit_price(*static_cast<const double *>(new_unit_price));
-}
-
-void Material::update_material_quantity(Material &material, const void *new_quantity) {
-    material.set_material_quantity(*static_cast<const double *>(new_quantity));
-}
-
-void Material::update_material_category(Material &material, const void *new_category) {
-    material.set_material_category(*static_cast<const Category *>(new_category));
-}
-
-// Functia principala de update
-void Material::update_material(Material &material, void (*func)(Material &, const void *), const void *new_value) {
-    if (func == nullptr)
-        return;
-    func(material, new_value);
+void Material::set_material_category(const Category new_material_category) {
+    category = new_material_category;
 }
 
 // Supraincarcare operator de atribuire
-// Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
-Material &Material::operator=(const Material &other) {
+// In loc sa transmitem cealalta instanta prin referinta, folosim o copie a ei pentru a evita posibilele erori la atribuiri individuale (copy and swap)
+Material &Material::operator=(Material other) {
     if (this == &other)
         return *this;
 
-    set_material_id(other.id);
-    set_material_name(other.name);
-    set_material_measure_unit(other.measure_unit);
-    set_material_quantity(other.quantity);
-    set_material_critical(other.critical);
-    set_material_unit_price(other.unit_price);
-    set_material_category(other.category);
+    std::swap(id, other.id);
+    std::swap(name, other.name);
+    std::swap(measure_unit, other.measure_unit);
+    std::swap(quantity, other.quantity);
+    std::swap(critical, other.critical);
+    std::swap(unit_price, other.unit_price);
+    std::swap(category, other.category);
 
     return *this;
 }
 
 // Supraincarcarea operatorilor relationali
-// Aplicam si aici verificari ale validitatii datelor pentru a putea folosi strcmp
 bool Material::operator==(const Material &other) const {
-    if ((this->id == nullptr) != (other.id == nullptr)) return false;
-    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
+    constexpr double epsilon = 1e-9;
 
-    if ((this->name == nullptr) != (other.name == nullptr)) return false;
-    if (this->name != nullptr && other.name != nullptr && strcmp(this->name, other.name) != 0) return false;
-
-    if ((this->measure_unit == nullptr) != (other.measure_unit == nullptr)) return false;
-    if (this->measure_unit != nullptr && other.measure_unit != nullptr && strcmp(this->measure_unit, other.measure_unit) != 0)
-        return false;
-
-    return this->quantity == other.quantity &&
-           this->critical == other.critical &&
-           this->unit_price == other.unit_price &&
-           this->category == other.category;
+    return id == other.id &&
+           name == other.name &&
+           measure_unit == other.measure_unit &&
+           std::abs(quantity - other.quantity) < epsilon &&
+           std::abs(critical - other.critical) < epsilon &&
+           std::abs(unit_price - other.unit_price) < epsilon &&
+           category == other.category;
 }
 
 bool Material::operator!=(const Material &other) const {
@@ -183,58 +116,63 @@ void Material::swap(Material &material1, Material &material2) noexcept {
     std::swap(material1.category, material2.category);
 }
 
+// Supraincarcarea operatorilor de I/O
 std::ostream &operator<<(std::ostream &os, const Material &material) {
-    os << "[ " << (material.id ? material.id : "N/A") << " ] " << (material.name ? material.name : "N/A") << "\n";
-    os << "  Category    : " << Material::material_category_to_string(material.category) << "\n";
-    os << "  Quantity    : " << material.quantity << " " << (material.measure_unit ? material.measure_unit : "N/A") << "\n";
-    os << "  Critical    : " << material.critical << " " << (material.measure_unit ? material.measure_unit : "N/A") << "\n";
-    os << "  Price/unit  : " << material.unit_price << " RON\n\n";
+    const std::string_view category = Material::material_category_to_string(material.category);
+
+    os << material.id << "  " << material.name << "\n";
+    os << "│  Category   " << category << "\n";
+    os << "│  Quantity   " << std::fixed << std::setprecision(2) << material.quantity << " " << material.measure_unit << "\n";
+    os << "│  Critical   " << std::fixed << std::setprecision(2) << material.critical << " " << material.measure_unit << "\n";
+    os << "│  Price      " << std::fixed << std::setprecision(2) << material.unit_price << " RON\n\n";
 
     return os;
 }
 
-// Supraincarcarea operatorilor de I/O
 std::istream &operator>>(std::istream &is, Material &material) {
-    char material_id[256];
-    char material_name[256];
-    char material_measure_unit[256];
-    int material_category;
+    std::string buffer;
     double temp;
+    int cat;
+
+    is.ignore();
 
     std::cout << "Enter material ID: ";
-    is >> material_id;
-    material.set_material_id(material_id);
+    std::getline(is,buffer);
+    material.set_material_id(buffer);
 
     std::cout << "Enter material name: ";
-    is >> material_name;
-    material.set_material_name(material_name);
+    std::getline(is,buffer);
+    material.set_material_name(buffer);
 
     std::cout << "Enter measure unit: ";
-    is >> material_measure_unit;
-    material.set_material_measure_unit(material_measure_unit);
+    std::getline(is,buffer);
+    material.set_material_measure_unit(buffer);
 
     std::cout << "Enter quantity: ";
     is >> temp;
+    is.ignore();
     material.set_material_quantity(temp);
 
     std::cout << "Enter critical level: ";
     is >> temp;
+    is.ignore();
     material.set_material_critical(temp);
 
     std::cout << "Enter unit price: ";
     is >> temp;
+    is.ignore();
     material.set_material_unit_price(temp);
 
     std::cout << "Enter category (0: wood, 1: metal, 2: finishes, 3: insulation, 4: others): ";
-    is >> material_category;
-    material_category = (material_category >= 0 && material_category <= 4) ? material_category : 4;
-    material.set_material_category(static_cast<Material::Category>(material_category));
+    is >> cat;
+    cat = (cat >= 0 && cat <= 4) ? cat : 4;
+    material.set_material_category(static_cast<Material::Category>(cat));
 
     return is;
 }
 
 // Convertor category la string
-const char *Material::material_category_to_string(const Category &category) {
+std::string_view Material::material_category_to_string(const Category category) {
     switch (category) {
         case Category::wood:
             return "wood";
