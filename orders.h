@@ -1,84 +1,80 @@
 #pragma once
+#include "materials.h"
 #include <iosfwd>
+#include <span>
+#include <string>
+#include <vector>
 
-// Definim sablonul pentru clasa Order
-// Orice instanta de tip Order va avea propria sa stare bazata pe aceste
-// definitii
 class Order {
 public:
-  // Un enum specific acestei clase pentru a gestiona starea comenzii
-  enum class Status { pending, delivered, cancelled, unknown };
+    enum class Status { pending, delivered, cancelled, unknown };
 
-  // Constructorul implicit
-  Order();
+    struct OrderMaterial {
+        std::string material_id;
+        std::string material_name;
+        std::string material_measure_unit;
+        Material::Category material_category;
+        double material_quantity;
+        double material_unit_price;
+    };
 
-  // Constructorul de copiere
-  Order(const Order &other);
+    // Constructorul implicit
+    Order();
 
-  // Constructorul cu parametri
-  Order(const char *id, const char *provider_id, const char **materials_id,
-        const int &materials_count, const double *quantities,
-        const double &total_price, const char *date, const Status &status);
+    // Constructorul de copiere
+    Order(const Order &other);
 
-  // Destructorul
-  ~Order();
+    // Constructorul cu parametri
+    Order(std::string_view new_order_id, std::string_view new_order_provider_id,
+          std::string_view new_order_date, Status new_order_status,
+          std::span<const OrderMaterial> new_order_materials);
 
-  // Getters
-  // Cuvantul cheie const de la final garanteaza ca aceste metode nu vor
-  // modifica starea instantei
-  [[nodiscard]] char *get_order_id() const; // Returneaza ID-ul comenzii
-  [[nodiscard]] char *get_order_provider_id() const; // Returneaza ID-ul furnizorului
-  [[nodiscard]] char **get_order_materials_id() const; // Returneaza un array de string-uri (ID-urile materialelor)
-  [[nodiscard]] double *get_order_quantities() const; // Returneaza un array cu cantitatile pentru fiecare material
-  [[nodiscard]] double get_order_total_price() const; // Returneaza valoarea totala
-  [[nodiscard]] char *get_order_date() const; // Returneaza data plasarii comenzii
-  [[nodiscard]] Status get_order_status() const; // Returneaza stadiul curent (pending, delivered etc.)
-  [[nodiscard]] int get_order_materials_count() const; // Returneaza numarul de materiale din comanda
+    // Destructorul
+    ~Order();
 
-  // Supraincarcarea operatorilor de I/O
-  friend std::ostream &operator<<(std::ostream &os, const Order &order);
-  friend std::istream &operator>>(std::istream &is, Order &order);
+    // Getters
+    [[nodiscard]] const std::string& get_order_id() const;
+    [[nodiscard]] const std::string& get_order_provider_id() const;
+    [[nodiscard]] const std::string& get_order_date() const;
+    [[nodiscard]] Status get_order_status() const;
+    [[nodiscard]] const std::vector<OrderMaterial>& get_order_materials() const;
+    [[nodiscard]] int get_order_materials_count() const;
+    [[nodiscard]] double get_order_total_price() const;
 
-  // Supraincarcarea operatorului de atribuire
-  Order &operator=(const Order &other);
+    // Supraincarcarea operatorilor de I/O
+    friend std::ostream &operator<<(std::ostream &os, const Order &order);
 
-  // Supraincarcarea operatorilor relationali
-  bool operator==(const Order &other) const;
-  bool operator!=(const Order &other) const;
+    // Supraincarcarea operatorului de atribuire
+    Order &operator=(Order other);
 
-  // Convertor status la string
-  static const char *order_status_to_string(const Status &status);
+    // Supraincarcarea operatorilor relationali
+    bool operator==(const Order &other) const;
+    bool operator!=(const Order &other) const;
 
-  // Interschimbare
-  static void swap(Order &order1, Order &order2) noexcept;
+    // Convertor status la string
+    static std::string_view order_status_to_string(Status status);
 
-  // Functii de update
-  static void update_order_id(Order &order, const void *new_data);
-  static void update_order_provider_id(Order &order, const void *new_data);
-  static void update_order_date(Order &order, const void *new_data);
-  static void update_order_total_price(Order &order, const void *new_data);
-  static void update_order_status(Order &order, const void *new_data);
-  static void update_order_materials(Order &order, const void *new_data);
-  static void update_order(Order &order, void (*func)(Order &, const void *), const void *new_value);
+    // Interschimbare
+    static void swap(Order &order1, Order &order2) noexcept;
+
+    // Setters
+    void set_order_id(std::string_view new_order_id);
+    void set_order_provider_id(std::string_view new_order_provider_id);
+    void set_order_date(std::string_view new_order_date);
+    void set_order_status(Status new_order_status);
+    void set_order_materials(std::span<const OrderMaterial> new_order_materials);
+
+    // Functii helper
+    static void validate_order_id(std::string_view new_order_id);
+    static void validate_order_date(std::string_view new_order_date);
+    static void validate_order_materials(std::span<const OrderMaterial> new_order_materials);
+    static void validate_order_materials_number(int new_order_materials_number);
+    static void order_material_already_exists(std::string_view material_id, std::span<const OrderMaterial> materials);
 
 private:
-  char *id;            // ID-ul comenzii
-  char *provider_id;   // ID-ul furnizorului
-  char **materials_id; // Un array dinamic de string-uri pentru ID-urile materialelor
-  int materials_count; // Numarul de materiale din comanda
-  double *quantities;  // Un array alocat dinamic pentru a stoca valorile cantitatilor
-  double total_price;  // Valoarea totala a comenzii
-  char *date;          // Data in care s-a dat comanda
-  Status status;       // Starea curenta a comenzii
-
-  // Setters
-  void set_order_id(const char *new_order_id);
-  void set_order_provider_id(const char *new_order_provider_id);
-  void set_order_materials(const char **new_order_materials, const double *new_order_quantities, const int &new_order_materials_count);
-  void set_order_total_price(const double &new_order_total_price);
-  void set_order_date(const char *new_order_date);
-  void set_order_status(const Status &new_order_status);
-
-  // Functii helper
-  static bool verify_order_date(const char *date) ;
+    std::string id;
+    std::string provider_id;
+    std::string date;
+    Status status;
+    std::vector<OrderMaterial> materials;
 };

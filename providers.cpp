@@ -1,212 +1,100 @@
 #include "providers.h"
+#include "materials.h"
 #include <cstring>
 #include <iostream>
+#include <regex>
+#include <algorithm>
+#include <iomanip>
 
 // Constructorul default
-Provider::Provider() {
-    this->id = nullptr;
-    this->name = nullptr;
-    this->phone = nullptr;
-    this->email = nullptr;
-    this->address = nullptr;
-    this->materials_id = nullptr;
-    this->materials_count = 0;
-}
-
-// Pentru urmatorii constructori folosim setters pentru atribuirea valorilor deoarece implementeaza deja verificarea datelor
-// De asemenea initializam pointerii la nullptr pentru a preveni stergerea memoriei de la adrese invalide
+Provider::Provider() = default;
 
 // Constructorul cu parametri
-Provider::Provider(const char *id, const char *name, const char *phone,
-                   const char *email, const char *address,
-                   const char **materials_id, const int &materials_count) : Provider() {
-    set_provider_id(id);
-    set_provider_name(name);
-    set_provider_phone(phone);
-    set_provider_email(email);
-    set_provider_address(address);
-    set_provider_materials(materials_id, materials_count);
+Provider::Provider(const std::string_view new_provider_id, const std::string_view new_provider_name,
+                   const std::string_view new_provider_phone, const std::string_view new_provider_email,
+                   const std::string_view new_provider_address, const std::span<const ProviderMaterial> new_provider_materials)
+    : id(new_provider_id), name(new_provider_name),
+      phone(new_provider_phone), email(new_provider_email),
+      address(new_provider_address), materials(new_provider_materials.begin(), new_provider_materials.end()) {
+    validate_provider_id(new_provider_id);
+    validate_provider_name(new_provider_name);
+    validate_provider_phone(new_provider_phone);
+    validate_provider_email(new_provider_email);
+    validate_provider_address(new_provider_address);
+    validate_provider_materials(new_provider_materials);
 }
 
 // Copy constructor
-Provider::Provider(const Provider &other) : Provider() {
-    set_provider_id(other.id);
-    set_provider_name(other.name);
-    set_provider_phone(other.phone);
-    set_provider_email(other.email);
-    set_provider_address(other.address);
-    set_provider_materials(const_cast<const char **>(other.materials_id), other.materials_count);
-}
+Provider::Provider(const Provider &other)
+    : Provider(other.id, other.name, other.phone, other.email, other.address, other.materials) {};
 
 // Destructorul
-Provider::~Provider() {
-    delete[] this->id;
-    delete[] this->name;
-    delete[] this->phone;
-    delete[] this->email;
-    delete[] this->address;
-
-    if (this->materials_id != nullptr)
-        for (int i = 0; i < this->materials_count; i++)
-            delete[] this->materials_id[i];
-    delete[] this->materials_id;
-}
+Provider::~Provider() = default;
 
 // Getters
-char *Provider::get_provider_id() const { return this->id; }
-char *Provider::get_provider_name() const { return this->name; }
-char *Provider::get_provider_phone() const { return this->phone; }
-char *Provider::get_provider_email() const { return this->email; }
-char *Provider::get_provider_address() const { return this->address; }
-char **Provider::get_provider_materials_id() const { return this->materials_id; }
-int Provider::get_provider_materials_count() const { return this->materials_count; }
+const std::string &Provider::get_provider_id() const { return id; }
+const std::string &Provider::get_provider_name() const { return name; }
+const std::string &Provider::get_provider_phone() const { return phone; }
+const std::string &Provider::get_provider_email() const { return email; }
+const std::string &Provider::get_provider_address() const { return address; }
+const std::vector<Provider::ProviderMaterial>& Provider::get_provider_materials() const { return materials; }
+int Provider::get_provider_materials_count() const { return static_cast<int>(materials.size()); }
 
 // Setters
-void Provider::set_provider_id(const char *new_provider_id) {
-    delete[] this->id;
-    this->id = (new_provider_id != nullptr)
-        ? (strcpy(new char[strlen(new_provider_id) + 1], new_provider_id))
-        : nullptr;
+void Provider::set_provider_id(const std::string_view new_provider_id) {
+    validate_provider_id(new_provider_id);
+    id = new_provider_id;
 }
-
-void Provider::set_provider_name(const char *new_provider_name) {
-    delete[] this->name;
-    this->name = (new_provider_name != nullptr)
-        ? (strcpy(new char[strlen(new_provider_name) + 1], new_provider_name))
-        : nullptr;
+void Provider::set_provider_name(const std::string_view new_provider_name) {
+    validate_provider_name(new_provider_name);
+    name = new_provider_name;
 }
-
-void Provider::set_provider_phone(const char *new_provider_phone) {
-    delete[] this->phone;
-    this->phone = (new_provider_phone != nullptr && verify_provider_phone(new_provider_phone))
-        ? (strcpy(new char[strlen(new_provider_phone) + 1], new_provider_phone))
-        : nullptr;
+void Provider::set_provider_phone(const std::string_view new_provider_phone) {
+    validate_provider_phone(new_provider_phone);
+    phone = new_provider_phone;
 }
-
-void Provider::set_provider_email(const char *new_provider_email) {
-    delete[] this->email;
-    this->email = (new_provider_email != nullptr && verify_provider_email(new_provider_email))
-        ? (strcpy(new char[strlen(new_provider_email) + 1], new_provider_email))
-        : nullptr;
+void Provider::set_provider_email(const std::string_view new_provider_email) {
+    validate_provider_email(new_provider_email);
+    email = new_provider_email;
 }
-
-void Provider::set_provider_address(const char *new_provider_address) {
-    delete[] this->address;
-    this->address = (new_provider_address != nullptr)
-        ? (strcpy(new char[strlen(new_provider_address) + 1], new_provider_address))
-        : nullptr;
+void Provider::set_provider_address(const std::string_view new_provider_address) {
+    validate_provider_address(new_provider_address);
+    address = new_provider_address;
 }
-
-void Provider::set_provider_materials(const char **new_provider_materials, const int &new_provider_materials_count) {
-    // Stergem memoria alocata anterior
-    if (materials_id != nullptr)
-        for (int i = 0; i < this->materials_count; i++)
-            delete[] this->materials_id[i];
-    delete[] this->materials_id;
-
-    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se poate
-    this->materials_count = (new_provider_materials_count >= 0) ? new_provider_materials_count : 0;
-    if (this->materials_count > 0 && new_provider_materials != nullptr) {
-        this->materials_id = new char *[this->materials_count];
-        for (int i = 0; i < this->materials_count; i++)
-            this->materials_id[i] = (new_provider_materials[i] != nullptr)
-                ? (strcpy(new char[strlen(new_provider_materials[i]) + 1], new_provider_materials[i]))
-                : nullptr;
-    } else {
-        // Altfel declaram inexistenta materialelor
-        this->materials_id = nullptr;
-        this->materials_count = 0;
-    }
-}
-
-// Functii de update
-// Ele sunt apelate de functia principala de update petru a modifica starea furnizorului
-// Sunt dezvoltate pentru implementari si adaptari ulterioare
-void Provider::update_provider_id(Provider &provider, const void *new_id) {
-    provider.set_provider_id(static_cast<const char *>(new_id));
-}
-
-void Provider::update_provider_name(Provider &provider, const void *new_name) {
-    provider.set_provider_name(static_cast<const char *>(new_name));
-}
-
-void Provider::update_provider_phone(Provider &provider, const void *new_phone) {
-    provider.set_provider_phone(static_cast<const char *>(new_phone));
-}
-
-void Provider::update_provider_email(Provider &provider, const void *new_email) {
-    provider.set_provider_email(static_cast<const char *>(new_email));
-}
-
-void Provider::update_provider_address(Provider &provider, const void *new_address) {
-    provider.set_provider_address(static_cast<const char *>(new_address));
-}
-
-struct MaterialsUpdate {
-    const char **new_materials_id;
-    int new_materials_count;
-};
-
-void Provider::update_provider_materials(Provider &provider, const void *data) {
-    const auto *u = static_cast<const MaterialsUpdate *>(data);
-    provider.set_provider_materials(u->new_materials_id, u->new_materials_count);
-}
-
-void Provider::update_provider(Provider &provider, void (*func)(Provider &, const void *), const void *new_data) {
-    if (func == nullptr)
-        return;
-    func(provider, new_data);
+void Provider::set_provider_materials(const std::span<const ProviderMaterial> new_provider_materials) {
+    validate_provider_materials(new_provider_materials);
+    materials = std::vector(new_provider_materials.begin(), new_provider_materials.end());
 }
 
 // Supraincarcarea operatorului de atribuire
-// Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
-Provider &Provider::operator=(const Provider &other) {
-    if (this == &other)
-        return *this;
-
-    set_provider_id(other.id);
-    set_provider_name(other.name);
-    set_provider_phone(other.phone);
-    set_provider_email(other.email);
-    set_provider_address(other.address);
-    set_provider_materials(const_cast<const char **>(other.materials_id), other.materials_count);
+Provider &Provider::operator=(Provider other) {
+    std::swap(id,other.id);
+    std::swap(name,other.name);
+    std::swap(phone,other.phone);
+    std::swap(email,other.email);
+    std::swap(address,other.address);
+    std::swap(materials,other.materials);
 
     return *this;
 }
 
 // Supraincarcarea operatorilor relationali
-// Aplicam si aici verificari ale validitatii datelor pentru a putea folosi strcmp
 bool Provider::operator==(const Provider &other) const {
-    if ((this->id == nullptr) != (other.id == nullptr)) return false;
-    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
+    constexpr double epsilon = 1e-9;
 
-    if ((this->name == nullptr) != (other.name == nullptr)) return false;
-    if (this->name != nullptr && other.name != nullptr && strcmp(this->name, other.name) != 0) return false;
-
-    if ((this->phone == nullptr) != (other.phone == nullptr)) return false;
-    if (this->phone != nullptr && other.phone != nullptr && strcmp(this->phone, other.phone) != 0) return false;
-
-    if ((this->email == nullptr) != (other.email == nullptr)) return false;
-    if (this->email != nullptr && other.email != nullptr && strcmp(this->email, other.email) != 0) return false;
-
-    if ((this->address == nullptr) != (other.address == nullptr)) return false;
-    if (this->address != nullptr && other.address != nullptr && strcmp(this->address, other.address) != 0) return false;
-
-    if (this->materials_count != other.materials_count) return false;
-    if ((this->materials_id == nullptr) != (other.materials_id == nullptr)) return false;
-    if (this->materials_id != nullptr)
-        for (int i = 0; i < this->materials_count; i++) {
-            if ((this->materials_id[i] == nullptr) != (other.materials_id[i] == nullptr)) return false;
-            if (this->materials_id[i] != nullptr && other.materials_id[i] != nullptr && strcmp(this->materials_id[i], other.materials_id[i]) != 0) return false;
-        }
-
-    return true;
+    return id == other.id &&
+           name == other.name &&
+           phone == other.phone &&
+           email == other.email &&
+           address == other.address &&
+           std::ranges::equal(materials, other.materials, [](const ProviderMaterial &m1, const ProviderMaterial &m2) {
+               return m1.material_id == m2.material_id &&
+                      m1.material_name == m2.material_name &&
+                      m1.material_category == m2.material_category &&
+                      std::abs(m1.unit_price - m2.unit_price) < epsilon;
+           });
 }
-
-// Refolosim codul deja scris pentru operatorul de inegalitate
-bool Provider::operator!=(const Provider &other) const {
-    return !(*this == other);
-}
+bool Provider::operator!=(const Provider &other) const { return !(*this == other); }
 
 // Interschimbare
 void Provider::swap(Provider &provider1, Provider &provider2) noexcept {
@@ -215,111 +103,172 @@ void Provider::swap(Provider &provider1, Provider &provider2) noexcept {
     std::swap(provider1.phone, provider2.phone);
     std::swap(provider1.email, provider2.email);
     std::swap(provider1.address, provider2.address);
-    std::swap(provider1.materials_id, provider2.materials_id);
-    std::swap(provider1.materials_count, provider2.materials_count);
+    std::swap(provider1.materials, provider2.materials);
 }
 
 // Supraincarcarea operatorilor de I/O
 std::istream &operator>>(std::istream &is, Provider &provider) {
-    char provider_id[256];
-    char provider_name[256];
-    char provider_phone[256];
-    char provider_email[256];
-    char provider_address[256];
-    int provider_materials_count;
+    std::vector<Provider::ProviderMaterial> buffer;
+    int cnt;
+    
+    is.ignore();
 
-    std::cout << "Enter provider ID: ";
-    is >> provider_id;
-    provider.set_provider_id(provider_id);
-
-    std::cout << "Enter provider name: ";
-    is >> provider_name;
-    provider.set_provider_name(provider_name);
-
-    std::cout << "Enter provider phone: ";
-    is >> provider_phone;
-    provider.set_provider_phone(provider_phone);
-
-    std::cout << "Enter provider email: ";
-    is >> provider_email;
-    provider.set_provider_email(provider_email);
-
-    std::cout << "Enter provider address: ";
-    is >> provider_address;
-    provider.set_provider_address(provider_address);
-
-    std::cout << "Enter number of materials: ";
-    is >> provider_materials_count;
-
-    if (provider_materials_count > 0) {
-        auto **provider_materials_id = new char *[provider_materials_count];
-
-        for (int i = 0; i < provider_materials_count; i++) {
-            char provider_material_id[256];
-            std::cout << "Enter material " << i + 1 << " ID: ";
-            is >> provider_material_id;
-            provider_materials_id[i] = new char[strlen(provider_material_id) + 1];
-            strcpy(provider_materials_id[i], provider_material_id);
-        }
-
-        provider.set_provider_materials(const_cast<const char **>(provider_materials_id), provider_materials_count);
-
-        for (int i = 0; i < provider_materials_count; i++)
-            delete[] provider_materials_id[i];
-        delete[] provider_materials_id;
-    } else {
-        provider.set_provider_materials(nullptr, 0);
+    Provider::read_string("Enter provider ID (expected format: PRV-#####)", [&provider](const std::string &s) { provider.set_provider_id(s); });
+    Provider::read_string("Enter provider name", [&provider](const std::string &s) { provider.set_provider_name(s); });
+    Provider::read_string("Enter provider phone (expected format: ##########)", [&provider](const std::string &s) { provider.set_provider_phone(s); });
+    Provider::read_string("Enter provider email", [&provider](const std::string &s) { provider.set_provider_email(s); });
+    Provider::read_string("Enter provider address", [&provider](const std::string &s) { provider.set_provider_address(s); });
+    Provider::read_string("Enter number of materials", [&cnt](const std::string &s) { cnt = std::stoi(s); Provider::validate_provider_materials_number(cnt); });
+    
+    for (int i=0;i<cnt;i++) {
+        Provider::ProviderMaterial material;
+        Provider::read_material(material, buffer);
+        buffer.push_back(material);
     }
+
+    provider.set_provider_materials(buffer);
 
     return is;
 }
 
 std::ostream &operator<<(std::ostream &os, const Provider &provider) {
-    os << "[ " << (provider.id ? provider.id : "N/A") << " ] " << (provider.name ? provider.name : "N/A") << "\n";
-    os << "  Phone      : " << (provider.phone ? provider.phone : "N/A") << "\n";
-    os << "  Email      : " << (provider.email ? provider.email : "N/A") << "\n";
-    os << "  Address    : " << (provider.address ? provider.address : "N/A") << "\n";
-    os << "  Materials  : ";
-
-    // Verificam existenta materialelor pentru a le putea afisa
-    if (provider.materials_id != nullptr && provider.materials_count > 0)
-        for (int i = 0; i < provider.materials_count; i++) {
-            os << (provider.materials_id[i] ? provider.materials_id[i] : "N/A");
-            if (i < provider.materials_count - 1)
-                os << ", ";
-        }
-    else
-        os << "None";
-    os << "\n\n";
+    os << provider.id << " " << provider.name << "\n";
+    os << "|  Phone      : " << provider.phone << "\n";
+    os << "|  Email      : " << provider.email << "\n";
+    os << "|  Address    : " << provider.address << "\n";
+    os << "|  Materials  : \n";
+    for (const auto &[material_id, material_name, material_category, unit_price] : provider.materials)
+        os << "|    - " << material_id << " " << material_name << " (Category: " << Material::material_category_to_string(material_category) << ", Unit price: " << std::fixed << std::setprecision(2) << unit_price << ")\n";
+    os << "|_\n\n";
 
     return os;
 }
 
-bool Provider::verify_provider_email(const char *email) {
-    if (email == nullptr)
-        return false;
-
-    const char *at_pos = strchr(email, '@');
-    if (at_pos == nullptr || at_pos == email || at_pos >= email + strlen(email) - 1)
-        return false;
-
-    const char *dot_pos = strrchr(at_pos, '.');
-    if (dot_pos == nullptr || dot_pos == at_pos + 1 || dot_pos >= email + strlen(email) - 1)
-        return false;
-
-    return true;
+// Functii helper
+void Provider::validate_provider_id(const std::string_view new_provider_id) {
+    if (new_provider_id.empty()) {
+        throw std::invalid_argument("Provider ID must not be empty");
+    }
+    static const std::regex id_regex("^PRV-[0-9]{5}$");
+    if (!std::regex_match(new_provider_id.begin(), new_provider_id.end(), id_regex)) {
+        throw std::invalid_argument("Invalid provider ID format");
+    }
 }
 
-bool Provider::verify_provider_phone(const char *phone) {
-    if (phone == nullptr)
-        return false;
+void Provider::validate_provider_name(const std::string_view new_provider_name) {
+    if (new_provider_name.empty()) {
+        throw std::invalid_argument("Provider name must not be empty");
+    }
+    if (std::ranges::all_of(new_provider_name, [](const unsigned char c) { return std::isspace(c); })) {
+        throw std::invalid_argument("Provider name must contain at least one non-space character");
+    }
+    if (!std::ranges::all_of(new_provider_name, [](const unsigned char c) { return std::isalnum(c) || std::isspace(c); })) {
+        throw std::invalid_argument("Provider name must contain only letters, numbers and spaces");
+    }
+}
 
-    if (strlen(phone) != 10)
-        return false;
+void Provider::validate_provider_phone(const std::string_view new_provider_phone) {
+    if (new_provider_phone.empty()) {
+        throw std::invalid_argument("Provider phone number must not be empty");
+    }
+    static const std::regex phone_regex("^[0-9]{10}$");
+    if (!std::regex_match(new_provider_phone.begin(), new_provider_phone.end(), phone_regex)) {
+        throw std::invalid_argument("Invalid provider phone number format");
+    }
+}
 
-    for (int i = 0; i < 10; i++)
-        if (phone[i] < '0' || phone[i] > '9')
-            return false;
+void Provider::validate_provider_email(const std::string_view new_provider_email) {
+    if (new_provider_email.empty()) {
+        throw std::invalid_argument("Provider email must not be empty");
+    }
+    static const std::regex email_regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    if (!std::regex_match(new_provider_email.begin(), new_provider_email.end(), email_regex)) {
+        throw std::invalid_argument("Invalid provider email format");
+    }
+}
 
-    return true;
+void Provider::validate_provider_address(const std::string_view new_provider_address) {
+    if (new_provider_address.empty()) {
+        throw std::invalid_argument("Provider address must not be empty");
+    }
+    if (std::ranges::all_of(new_provider_address, [](const unsigned char c) { return std::isspace(c); })) {
+        throw std::invalid_argument("Provider address must contain at least one non-space character");
+    }
+    if (!std::ranges::all_of(new_provider_address, [](const unsigned char c) { return std::isalnum(c) || std::isspace(c); })) {
+        throw std::invalid_argument("Provider address must contain only letters, numbers and spaces");
+    }
+}
+
+void Provider::provider_material_already_exists(const std::string_view material_id, const std::span<const ProviderMaterial> materials) {
+    if (std::ranges::any_of(materials, [material_id](const ProviderMaterial &m) { return m.material_id == material_id; })) {
+        throw std::invalid_argument("Provider material with the same ID already exists");
+    }
+}
+
+void Provider::read_string(const std::string &prompt, auto setter) {
+    while (true) {
+        try {
+            std::cout << prompt << ": ";
+            std::string temp;
+            std::getline(std::cin, temp);
+            setter(temp);
+            break;
+        } catch (const std::invalid_argument &e) {
+            std::cout << "Error: " << e.what() << ". Try again.\n";
+        } catch (const std::out_of_range &) {
+            std::cout << "Error: value out of range. Try again.\n";
+        }
+    }
+}
+
+void Provider::set_provider_material_id(ProviderMaterial &material, const std::string_view new_provider_material_id, const std::span<const ProviderMaterial> materials) {
+    Material::validate_material_id(new_provider_material_id);
+    provider_material_already_exists(new_provider_material_id, materials);
+    material.material_id = new_provider_material_id;
+}
+
+void Provider::set_provider_material_name(ProviderMaterial &material, const std::string_view new_provider_material_name) {
+    Material::validate_material_name(new_provider_material_name);
+    material.material_name = new_provider_material_name;
+}
+
+void Provider::set_provider_material_unit_price(ProviderMaterial &material, const double new_provider_material_unit_price) {
+    Material::validate_material_unit_price(new_provider_material_unit_price);
+    material.unit_price = new_provider_material_unit_price;
+}
+
+void Provider::read_material(ProviderMaterial &material, const std::span<const ProviderMaterial> materials) {
+    read_string("Enter material ID", [&material, materials](const std::string &s) { set_provider_material_id(material, s, materials); });
+    read_string("Enter material name", [&material](const std::string &s) { set_provider_material_name(material, s); });
+    read_string("Enter material category (0 - wood, 1 - metal, 2 - insulation, 3 - finishes, 4 - others)",
+    [&material](const std::string &s) {
+        const int cat = std::stoi(s);
+        if (cat < 0 || cat > 4)
+            throw std::invalid_argument("Category must be between 0 and 4");
+        material.material_category = static_cast<Material::Category>(cat);
+    });
+    read_string("Enter material unit price", [&material](const std::string &s) { set_provider_material_unit_price(material, std::stod(s)); });
+}
+
+void Provider::validate_provider_materials_number(const int new_provider_materials_number) {
+    if (new_provider_materials_number < 1) {
+        throw std::invalid_argument("Provider materials number must be at least 1");
+    }
+    // Am ales 15 ca limita superioara strict in scop demonstrativ
+    if (new_provider_materials_number > 15) {
+        throw std::invalid_argument("Provider materials number must be at most 15");
+    }
+}
+
+void Provider::validate_provider_materials(const std::span<const ProviderMaterial> new_provider_materials) {
+    validate_provider_materials_number(static_cast<int>(new_provider_materials.size()));
+    for (const auto &[material_id, material_name, material_category, unit_price] : new_provider_materials) {
+        Material::validate_material_id(material_id);
+        Material::validate_material_name(material_name);
+        Material::validate_material_unit_price(unit_price);
+    }
+    for (int i=0;i<static_cast<int>(new_provider_materials.size())-1;i++)
+        for (int j=i+1;j<static_cast<int>(new_provider_materials.size());j++)
+            if (new_provider_materials[i].material_id == new_provider_materials[j].material_id)
+                throw std::invalid_argument("Provider materials must not contain duplicate ID's");
 }
