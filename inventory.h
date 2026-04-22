@@ -12,38 +12,39 @@ public:
     Inventory(const Inventory &other);
 
     // Constructor cu parametri
-    Inventory(const char *id, const char *name, const char *address, const char *phone, const char *email,
-              const Material *materials, const Provider *providers, const Order *orders,
-              const int &materials_count, const int &providers_count, const int &orders_count);
+    Inventory(std::string_view new_inventory_id, std::string_view new_inventory_name, std::string_view new_inventory_address,
+              std::string_view new_inventory_phone, std::string_view new_inventory_email,
+              std::span<const Material> new_inventory_materials, std::span<const Provider> new_inventory_providers,
+              std::span<const Order> new_inventory_orders);
 
     // Destructor
     ~Inventory();
 
     // Getters
-    [[nodiscard]] char *get_inventory_id() const; // Returnează ID-ul
-    [[nodiscard]] char *get_inventory_name() const; // Returnează numele
-    [[nodiscard]] char *get_inventory_address() const; // Returnează adresa
-    [[nodiscard]] char *get_inventory_phone() const; // Returnează telefonul
-    [[nodiscard]] char *get_inventory_email() const; // Returnează email-ul
-    [[nodiscard]] Material *get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
-    [[nodiscard]] Provider *get_inventory_providers() const; // Returnează tabloul de furnizori
-    [[nodiscard]] Order *get_inventory_orders() const; // Returnează tabloul de comenzi
+    [[nodiscard]] const std::string &get_inventory_id() const; // Returnează ID-ul
+    [[nodiscard]] const std::string &get_inventory_name() const; // Returnează numele
+    [[nodiscard]] const std::string &get_inventory_address() const; // Returnează adresa
+    [[nodiscard]] const std::string &get_inventory_phone() const; // Returnează telefonul
+    [[nodiscard]] const std::string &get_inventory_email() const; // Returnează email-ul
+    [[nodiscard]] const std::vector<Material> &get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
+    [[nodiscard]] const std::vector<Provider> &get_inventory_providers() const; // Returnează tabloul de furnizori
+    [[nodiscard]] const std::vector<Order> &get_inventory_orders() const; // Returnează tabloul de comenzi
     [[nodiscard]] int get_inventory_materials_count() const; // Returnează numărul efectiv de materiale stocate în inventar
     [[nodiscard]] int get_inventory_providers_count() const; // Returnează numărul efectiv de furnizori stocați în inventar
     [[nodiscard]] int get_inventory_orders_count() const; // Returnează numărul efectiv de comenzi stocate în inventar
 
     // Metode care modifică starea obiectului
     void add_material(const Material &material); // Adaugă o copie a obiectului material în inventar
-    void add_provider(const Provider &provider); // Adaugă un nou furnizor
-    void add_order(const Order &order); // Înregistrează o comandă nouă
-    void consume_material(const char *material_id, const double &quantity); // Recalculează cantitatea disponibilă a unui material după consum
+    void register_provider(std::span<const Provider> available_providers); // Adaugă un nou furnizor
+    void place_order(); // Înregistrează o comandă nouă
+    void consume_material(); // Recalculează cantitatea disponibilă a unui material după consum
     void receive_order(Order *order); // Procesează o comandă și actualizează stocurile corespunzătoare
 
     // Metode de căutare pe instanța curentă
     // Returnează un pointer către obiectul găsit în interiorul inventarului
-    [[nodiscard]] Material *find_material_by_id(const char *find_id) const;
-    [[nodiscard]] Provider *find_provider_by_id(const char *find_id) const;
-    [[nodiscard]] Order *find_order_by_id(const char *find_id) const;
+    Material *find_material_by_id(std::string_view find_id);
+    Provider *find_provider_by_id(std::string_view find_id);
+    Order *find_order_by_id(std::string_view find_id);
 
     // Calculează valoarea totală iterând prin toate obiectele Material din instanța curentă
     [[nodiscard]] double calculate_inventory_value() const;
@@ -60,12 +61,12 @@ public:
     // Filtre
     // Creează și returnează un nou tablou de obiecte care respectă anumite criterii
     // Variabila result_count transmisă prin referință va fi modificată pentru a reflecta dimensiunea noului tablou returnat
-    [[nodiscard]] Order *get_orders_by_provider_id(const char *provider_id, int &result_count);
-    [[nodiscard]] Material *get_critical_materials(int &result_count);
-    [[nodiscard]] Material *get_materials_by_category(const Material::Category &category, int &result_count);
+    const std::vector<Order> get_orders_by_provider_id(std::string_view provider_id);
+    const std::vector<Material> get_critical_materials();
+    const std::vector<Provider> get_materials_by_category(Material::Category category);
 
     // Supraîncărcarea operatorului de atribuire
-    Inventory &operator=(const Inventory &other);
+    Inventory &operator=(Inventory other);
 
     // Supraîncărcarea operatorilor relaționali.
     bool operator==(const Inventory &other) const;
@@ -75,41 +76,38 @@ public:
     friend std::istream &operator>>(std::istream &is, Inventory &inventory);
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inventory);
 
-    // Functii de update
-    static void update_inventory_id(Inventory &inventory, const void *new_id);
-    static void update_inventory_name(Inventory &inventory, const void *new_name);
-    static void update_inventory_address(Inventory &inventory, const void *new_address);
-    static void update_inventory_phone(Inventory &inventory, const void *new_phone);
-    static void update_inventory_email(Inventory &inventory, const void *new_email);
-    static void update_inventory_materials(Inventory &inventory, const void *new_data);
-    static void update_inventory_providers(Inventory &inventory, const void *new_data);
-    static void update_inventory_orders(Inventory &inventory, const void *new_data);
-    static void update_inventory(Inventory &inventory, void (*func)(Inventory &, const void *), const void *new_data);
+    // Setters
+    void set_inventory_id(std::string_view new_inventory_id);
+    void set_inventory_name(std::string_view new_inventory_name);
+    void set_inventory_address(std::string_view new_inventory_address);
+    void set_inventory_phone(std::string_view new_inventory_phone);
+    void set_inventory_email(std::string_view new_inventory_email);
+    void set_inventory_materials(std::span<const Material> new_inventory_materials);
+    void set_inventory_providers(std::span<const Provider> new_inventory_providers);
+    void set_inventory_orders(std::span<const Order> new_inventory_orders);
 
 private:
-    char *id; // ID-ul inventarului
-    char *name; // Numele inventarului
-    char *address; // Adresa inventarului
-    char *phone; // Numărul de telefon al inventarului
-    char *email; // Email-ul inventarului
-    Material *materials; // Array-ul de materiale al inventarului
-    Provider *providers; // Array-ul de furnizori al inventarului
-    Order *orders; // Array-ul de comenzi al inventarului
-    int materials_count; // Numărul efectiv de materiale din inventar
-    int providers_count; // Numărul efectiv de furnizori de la care se poate comanda
-    int orders_count; // Numărul efectiv de comenzi existente pentru inventar
-
-    // Setters
-    void set_inventory_id(const char *new_inventory_id);
-    void set_inventory_name(const char *new_inventory_name);
-    void set_inventory_address(const char *new_inventory_address);
-    void set_inventory_phone(const char *new_inventory_phone);
-    void set_inventory_email(const char *new_inventory_email);
-    void set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count);
-    void set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count);
-    void set_inventory_orders(const Order *new_inventory_orders, const int &new_inventory_orders_count);
+    std::string id; // ID-ul inventarului
+    std::string name; // Numele inventarului
+    std::string address; // Adresa inventarului
+    std::string phone; // Numărul de telefon al inventarului
+    std::string email; // Email-ul inventarului
+    std::vector<Material> materials; // Array-ul de materiale al inventarului
+    std::vector<Provider> providers; // Array-ul de furnizori al inventarului
+    std::vector<Order> orders; // Array-ul de comenzi al inventarului
 
     // Functii helper
-    static bool verify_inventory_phone(const char *phone);
-    static bool verify_inventory_email(const char *email);
+    static void validate_inventory_id(std::string_view new_inventory_id);
+    static void validate_inventory_name(std::string_view new_inventory_name);
+    static void validate_inventory_address(std::string_view new_inventory_address);
+    static void validate_inventory_phone(std::string_view new_inventory_phone);
+    static void validate_inventory_email(std::string_view new_inventory_email);
+    static void validate_inventory_materials(std::span<const Material> new_inventory_materials);
+    static void validate_inventory_providers(std::span<const Provider> new_inventory_providers);
+    static void validate_inventory_orders(std::span<const Order> new_inventory_orders);
+    static void read_string(std::string_view prompt, auto setter);
+    void print_available_unregistered_providers(std::span<const Provider> available_providers);
+    void print_inventory_providers() const;
+    void print_inventory_materials() const;
+    void print_inventory_orders() const;
 };

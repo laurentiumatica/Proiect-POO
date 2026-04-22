@@ -1,6 +1,5 @@
 #include "providers.h"
 #include "materials.h"
-#include <cstring>
 #include <iostream>
 #include <regex>
 #include <algorithm>
@@ -91,7 +90,8 @@ bool Provider::operator==(const Provider &other) const {
                return m1.material_id == m2.material_id &&
                       m1.material_name == m2.material_name &&
                       m1.material_category == m2.material_category &&
-                      std::abs(m1.unit_price - m2.unit_price) < epsilon;
+                      m1.material_measure_unit == m2.material_measure_unit &&
+                      std::abs(m1.material_unit_price - m2.material_unit_price) < epsilon;
            });
 }
 bool Provider::operator!=(const Provider &other) const { return !(*this == other); }
@@ -115,7 +115,7 @@ std::istream &operator>>(std::istream &is, Provider &provider) {
 
     Provider::read_string("Enter provider ID (expected format: PRV-#####)", [&provider](const std::string &s) { provider.set_provider_id(s); });
     Provider::read_string("Enter provider name", [&provider](const std::string &s) { provider.set_provider_name(s); });
-    Provider::read_string("Enter provider phone (expected format: ##########)", [&provider](const std::string &s) { provider.set_provider_phone(s); });
+    Provider::read_string("Enter provider phone (expected format: 10 digits)", [&provider](const std::string &s) { provider.set_provider_phone(s); });
     Provider::read_string("Enter provider email", [&provider](const std::string &s) { provider.set_provider_email(s); });
     Provider::read_string("Enter provider address", [&provider](const std::string &s) { provider.set_provider_address(s); });
     Provider::read_string("Enter number of materials", [&cnt](const std::string &s) { cnt = std::stoi(s); Provider::validate_provider_materials_number(cnt); });
@@ -137,8 +137,8 @@ std::ostream &operator<<(std::ostream &os, const Provider &provider) {
     os << "|  Email      : " << provider.email << "\n";
     os << "|  Address    : " << provider.address << "\n";
     os << "|  Materials  : \n";
-    for (const auto &[material_id, material_name, material_category, unit_price] : provider.materials)
-        os << "|    - " << material_id << " " << material_name << " (Category: " << Material::material_category_to_string(material_category) << ", Unit price: " << std::fixed << std::setprecision(2) << unit_price << ")\n";
+    for (const auto &[material_id, material_name, material_measure_unit, material_category, unit_price] : provider.materials)
+        os << "|    - " << material_id << " " << material_name << " (Category: " << Material::material_category_to_string(material_category) << ", Unit: " << material_measure_unit << ", Unit price: " << std::fixed << std::setprecision(2) << unit_price << ")\n";
     os << "|_\n\n";
 
     return os;
@@ -151,7 +151,7 @@ void Provider::validate_provider_id(const std::string_view new_provider_id) {
     }
     static const std::regex id_regex("^PRV-[0-9]{5}$");
     if (!std::regex_match(new_provider_id.begin(), new_provider_id.end(), id_regex)) {
-        throw std::invalid_argument("Invalid provider ID format");
+        throw std::invalid_argument("Invalid provider ID format (expected format: PRV-XXXXX)");
     }
 }
 
@@ -173,7 +173,7 @@ void Provider::validate_provider_phone(const std::string_view new_provider_phone
     }
     static const std::regex phone_regex("^[0-9]{10}$");
     if (!std::regex_match(new_provider_phone.begin(), new_provider_phone.end(), phone_regex)) {
-        throw std::invalid_argument("Invalid provider phone number format");
+        throw std::invalid_argument("Invalid provider phone number format (expected format: 10 digits)");
     }
 }
 
@@ -205,7 +205,7 @@ void Provider::provider_material_already_exists(const std::string_view material_
     }
 }
 
-void Provider::read_string(const std::string &prompt, auto setter) {
+void Provider::read_string(const std::string_view prompt, auto setter) {
     while (true) {
         try {
             std::cout << prompt << ": ";
@@ -234,12 +234,18 @@ void Provider::set_provider_material_name(ProviderMaterial &material, const std:
 
 void Provider::set_provider_material_unit_price(ProviderMaterial &material, const double new_provider_material_unit_price) {
     Material::validate_material_unit_price(new_provider_material_unit_price);
-    material.unit_price = new_provider_material_unit_price;
+    material.material_unit_price = new_provider_material_unit_price;
+}
+
+void Provider::set_provider_material_measure_unit(ProviderMaterial &material, const std::string_view new_provider_material_measure_unit) {
+    Material::validate_material_measure_unit(new_provider_material_measure_unit);
+    material.material_measure_unit = new_provider_material_measure_unit;
 }
 
 void Provider::read_material(ProviderMaterial &material, const std::span<const ProviderMaterial> materials) {
-    read_string("Enter material ID", [&material, materials](const std::string &s) { set_provider_material_id(material, s, materials); });
+    read_string("Enter material ID (expected format: MAT-#####)", [&material, materials](const std::string &s) { set_provider_material_id(material, s, materials); });
     read_string("Enter material name", [&material](const std::string &s) { set_provider_material_name(material, s); });
+    read_string("Enter material measure unit", [&material](const std::string &s) { set_provider_material_measure_unit(material, s); });
     read_string("Enter material category (0 - wood, 1 - metal, 2 - insulation, 3 - finishes, 4 - others)",
     [&material](const std::string &s) {
         const int cat = std::stoi(s);
@@ -260,15 +266,22 @@ void Provider::validate_provider_materials_number(const int new_provider_materia
     }
 }
 
+
 void Provider::validate_provider_materials(const std::span<const ProviderMaterial> new_provider_materials) {
     validate_provider_materials_number(static_cast<int>(new_provider_materials.size()));
-    for (const auto &[material_id, material_name, material_category, unit_price] : new_provider_materials) {
+    for (const auto &[material_id, material_name, material_measure_unit, material_category, material_unit_price] : new_provider_materials) {
         Material::validate_material_id(material_id);
         Material::validate_material_name(material_name);
-        Material::validate_material_unit_price(unit_price);
+        Material::validate_material_measure_unit(material_measure_unit);
+        Material::validate_material_unit_price(material_unit_price);
     }
     for (int i=0;i<static_cast<int>(new_provider_materials.size())-1;i++)
         for (int j=i+1;j<static_cast<int>(new_provider_materials.size());j++)
             if (new_provider_materials[i].material_id == new_provider_materials[j].material_id)
                 throw std::invalid_argument("Provider materials must not contain duplicate ID's");
+}
+
+void Provider::print_available_materials(const std::span<const ProviderMaterial> available_materials) {
+    for (const auto &[material_id, material_name, material_measure_unit, material_category, material_unit_price] : available_materials)
+        std::cout << material_id << " " << material_name << " (Category: " << Material::material_category_to_string(material_category) << ", Unit: " << material_measure_unit << ", Unit price: " << material_unit_price << ")\n";
 }

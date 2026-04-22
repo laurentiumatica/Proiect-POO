@@ -1,7 +1,6 @@
 #pragma once
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 class Material {
 public:
@@ -15,7 +14,7 @@ public:
     Material(const Material &other);
 
     // Constructorul cu parametri
-    Material(std::string new_material_id,std::string new_material_name, std::string new_material_measure_unit,\
+    Material(std::string_view new_material_id,std::string_view new_material_name, std::string_view new_material_measure_unit,
              double new_material_quantity, double new_material_critical, double new_material_unit_price,
              Category new_material_category);
 
@@ -51,13 +50,22 @@ public:
     static void swap(Material &material1, Material &material2) noexcept;
 
     // Setters
-    void set_material_id(std::string new_material_id); // Aloca memorie si actualizeaza ID-ul
-    void set_material_name(std::string new_material_name); // Aloca memorie si actualizeaza numele
-    void set_material_measure_unit(std::string new_material_measure_unit); // Aloca memorie si actualizeaza unitatea de masura
+    void set_material_id(std::string_view new_material_id); // Aloca memorie si actualizeaza ID-ul
+    void set_material_name(std::string_view new_material_name); // Aloca memorie si actualizeaza numele
+    void set_material_measure_unit(std::string_view new_material_measure_unit); // Aloca memorie si actualizeaza unitatea de masura
     void set_material_critical(double new_material_critical); // Actualizeaza limita critica
     void set_material_unit_price(double new_material_unit_price); // Actualizeaza pretul unitar
     void set_material_quantity(double new_material_quantity); // Actualizeaza cantitatea
     void set_material_category(Category new_material_category); // Actualizeaza categoria
+
+    // Functii helper
+    static void validate_material_id(std::string_view new_material_id); // Validare ID
+    static void validate_material_name(std::string_view new_material_name); // Validare nume
+    static void validate_material_measure_unit(std::string_view new_material_measure_unit); // Validare unitate de masura
+    static void validate_material_quantity(double new_material_quantity); // Validare cantitate
+    static void validate_material_critical(double new_material_critical); // Validare limita critica
+    static void validate_material_unit_price(double new_material_unit_price); // Validare pret unitar
+    static void read_string(std::string_view prompt, auto setter); // Functie helper pentru citirea stringurilor cu validare
 
 private:
     std::string id; // ID-ul materialului

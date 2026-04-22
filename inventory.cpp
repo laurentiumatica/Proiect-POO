@@ -1,477 +1,258 @@
 #include "inventory.h"
-#include <cstring>
+#include <regex>
+#include <algorithm>
 #include <iostream>
 
 // Constructorul default
-Inventory::Inventory() {
-    this->id = nullptr;
-    this->name = nullptr;
-    this->address = nullptr;
-    this->phone = nullptr;
-    this->email = nullptr;
-    this->materials = nullptr;
-    this->providers = nullptr;
-    this->orders = nullptr;
-    this->materials_count = 0;
-    this->providers_count = 0;
-    this->orders_count = 0;
+Inventory::Inventory() = default;
+
+// Constructorul cu parametri
+Inventory::Inventory(const std::string_view new_inventory_id, const std::string_view new_inventory_name, const std::string_view new_inventory_address,
+                     const std::string_view new_inventory_phone, const std::string_view new_inventory_email,
+                     const std::span<const Material> new_inventory_materials,
+                     const std::span<const Provider> new_inventory_providers,
+                     const std::span<const Order> new_inventory_orders)
+    : id(new_inventory_id), name(new_inventory_name), address(new_inventory_address),
+      phone(new_inventory_phone), email(new_inventory_email) {
+    validate_inventory_id(id);
+    validate_inventory_name(name);
+    validate_inventory_address(address);
+    validate_inventory_phone(phone);
+    validate_inventory_email(email);
+    validate_inventory_materials(materials);
+    validate_inventory_providers(providers);
+    validate_inventory_orders(orders);
 }
 
 // Copy constructor
-Inventory::Inventory(const Inventory &other) : Inventory() {
-    set_inventory_id(other.get_inventory_id());
-    set_inventory_name(other.get_inventory_name());
-    set_inventory_address(other.get_inventory_address());
-    set_inventory_phone(other.get_inventory_phone());
-    set_inventory_email(other.get_inventory_email());
-    set_inventory_materials(other.get_inventory_materials(), other.get_inventory_materials_count());
-    set_inventory_providers(other.get_inventory_providers(), other.get_inventory_providers_count());
-    set_inventory_orders(other.get_inventory_orders(), other.get_inventory_orders_count());
-}
-
-// Constructorul cu parametri
-Inventory::Inventory(const char *id, const char *name, const char *address, const char *phone, const char *email,
-                     const Material *materials, const Provider *providers, const Order *orders,
-                     const int &materials_count, const int &providers_count, const int &orders_count) : Inventory() {
-    set_inventory_id(id);
-    set_inventory_name(name);
-    set_inventory_address(address);
-    set_inventory_phone(phone);
-    set_inventory_email(email);
-    set_inventory_materials(materials, materials_count);
-    set_inventory_providers(providers, providers_count);
-    set_inventory_orders(orders, orders_count);
-}
+Inventory::Inventory(const Inventory &other) : Inventory(other.id, other.name, other.address, other.phone, other.email, other.materials, other.providers, other.orders) {}
 
 // Destructor
-Inventory::~Inventory() {
-    delete[] this->id;
-    delete[] this->name;
-    delete[] this->address;
-    delete[] this->phone;
-    delete[] this->email;
-    delete[] this->materials;
-    delete[] this->providers;
-    delete[] this->orders;
-}
+Inventory::~Inventory() = default;
 
 // Getters
-char *Inventory::get_inventory_id() const { return this->id; }
-char *Inventory::get_inventory_name() const { return this->name; }
-char *Inventory::get_inventory_address() const { return this->address; }
-char *Inventory::get_inventory_phone() const { return this->phone; }
-char *Inventory::get_inventory_email() const { return this->email; }
-Material *Inventory::get_inventory_materials() const { return this->materials; }
-Provider *Inventory::get_inventory_providers() const { return this->providers; }
-Order *Inventory::get_inventory_orders() const { return this->orders; }
-int Inventory::get_inventory_materials_count() const { return this->materials_count; }
-int Inventory::get_inventory_providers_count() const { return this->providers_count; }
-int Inventory::get_inventory_orders_count() const { return this->orders_count; }
+const std::string &Inventory::get_inventory_id() const { return id; }
+const std::string &Inventory::get_inventory_name() const { return name; }
+const std::string &Inventory::get_inventory_address() const { return address; }
+const std::string &Inventory::get_inventory_phone() const { return phone; }
+const std::string &Inventory::get_inventory_email() const { return email; }
+const std::vector<Material> &Inventory::get_inventory_materials() const { return materials; }
+const std::vector<Provider> &Inventory::get_inventory_providers() const { return providers; }
+const std::vector<Order> &Inventory::get_inventory_orders() const { return orders; }
+int Inventory::get_inventory_materials_count() const { return static_cast<int>(materials.size()); }
+int Inventory::get_inventory_providers_count() const { return static_cast<int>(providers.size()); }
+int Inventory::get_inventory_orders_count() const { return static_cast<int>(orders.size()); }
 
-void Inventory::set_inventory_id(const char *new_inventory_id) {
-    delete[] this->id;
-    this->id = (new_inventory_id != nullptr)
-        ? strcpy(new char[strlen(new_inventory_id) + 1], new_inventory_id)
-        : nullptr;
+// Setters
+void Inventory::set_inventory_id(const std::string_view new_inventory_id) {
+    validate_inventory_id(new_inventory_id);
+    id = new_inventory_id;
 }
 
-void Inventory::set_inventory_name(const char *new_inventory_name) {
-    delete[] this->name;
-    this->name = (new_inventory_name != nullptr)
-        ? strcpy(new char[strlen(new_inventory_name) + 1], new_inventory_name)
-        : nullptr;
+void Inventory::set_inventory_name(const std::string_view new_inventory_name) {
+    validate_inventory_name(new_inventory_name);
+    name = new_inventory_name;
 }
 
-void Inventory::set_inventory_address(const char *new_inventory_address) {
-    delete[] this->address;
-    this->address = (new_inventory_address != nullptr)
-        ? strcpy(new char[strlen(new_inventory_address) + 1], new_inventory_address)
-        : nullptr;
+void Inventory::set_inventory_address(const std::string_view new_inventory_address) {
+    validate_inventory_address(new_inventory_address);
+    address = new_inventory_address;
 }
 
-void Inventory::set_inventory_phone(const char *new_inventory_phone) {
-    delete[] this->phone;
-    this->phone = (new_inventory_phone != nullptr && verify_inventory_phone(new_inventory_phone))
-        ? strcpy(new char[strlen(new_inventory_phone) + 1], new_inventory_phone)
-        : nullptr;
+void Inventory::set_inventory_phone(const std::string_view new_inventory_phone) {
+    validate_inventory_phone(new_inventory_phone);
+    phone = new_inventory_phone;
 }
 
-void Inventory::set_inventory_email(const char *new_inventory_email) {
-    delete[] this->email;
-    this->email = (new_inventory_email != nullptr && verify_inventory_email(new_inventory_email))
-        ? strcpy(new char[strlen(new_inventory_email) + 1], new_inventory_email)
-        : nullptr;
+void Inventory::set_inventory_email(const std::string_view new_inventory_email) {
+    validate_inventory_email(new_inventory_email);
+    email = new_inventory_email;
 }
 
-void Inventory::set_inventory_materials(const Material *new_inventory_materials, const int &new_inventory_materials_count) {
-    // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
-    delete[] this->materials;
-
-    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se poate
-    this->materials_count = (new_inventory_materials_count > 0) ? new_inventory_materials_count : 0;
-    if (this->materials_count > 0 && new_inventory_materials != nullptr) {
-        this->materials = new Material[this->materials_count];
-        for (int i = 0; i < this->materials_count; i++)
-            this->materials[i] = new_inventory_materials[i];
-    } else {
-        this->materials = nullptr;
-        this->materials_count = 0;
-    }
+void Inventory::set_inventory_materials(const std::span<const Material> new_inventory_materials) {
+    validate_inventory_materials(new_inventory_materials);
+    materials = std::vector(new_inventory_materials.begin(), new_inventory_materials.end());
 }
 
-void Inventory::set_inventory_providers(const Provider *new_inventory_providers, const int &new_inventory_providers_count) {
-    // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
-    delete[] this->providers;
-
-    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se poate
-    this->providers_count = (new_inventory_providers_count > 0) ? new_inventory_providers_count : 0;
-    if (this->providers_count > 0 && new_inventory_providers != nullptr) {
-        this->providers = new Provider [this->providers_count];
-        for (int i = 0; i < this->providers_count; i++)
-            this->providers[i] = new_inventory_providers[i];
-    } else {
-        this->providers = nullptr;
-        this->providers_count = 0;
-    }
+void Inventory::set_inventory_providers(const std::span<const Provider> new_inventory_providers) {
+    validate_inventory_providers(new_inventory_providers);
+    providers = std::vector(new_inventory_providers.begin(), new_inventory_providers.end());
 }
 
-void Inventory::set_inventory_orders(const Order *new_inventory_orders, const int &new_inventory_orders_count) {
-    // Nu este nevoie de o stergere mai complexa a memoriei alocate datorita destructorilor obiectului
-    delete[] this->orders;
-
-    // Verificam posibilitatea de copiere a noilor valori si efectuam daca se poate
-    this->orders_count = (new_inventory_orders_count > 0) ? new_inventory_orders_count : 0;
-    if (this->orders_count > 0 && new_inventory_orders != nullptr) {
-        this->orders = new Order [this->orders_count];
-        for (int i = 0; i < this->orders_count; i++)
-            this->orders[i] = new_inventory_orders[i];
-    } else {
-        this->orders = nullptr;
-        this->orders_count = 0;
-    }
-}
-
-// Functii de update
-// Ele sunt apelate de functia principala de update petru a modifica starea inventarului
-// Sunt dezvoltate pentru implementari si adaptari ulterioare
-void Inventory::update_inventory_id(Inventory &inventory, const void *new_id) {
-    inventory.set_inventory_id(static_cast<const char *>(new_id));
-}
-
-void Inventory::update_inventory_name(Inventory &inventory, const void *new_name) {
-    inventory.set_inventory_name(static_cast<const char *>(new_name));
-}
-
-void Inventory::update_inventory_address(Inventory &inventory, const void *new_address) {
-    inventory.set_inventory_address(static_cast<const char *>(new_address));
-}
-
-void Inventory::update_inventory_phone(Inventory &inventory, const void *new_phone) {
-    inventory.set_inventory_phone(static_cast<const char *>(new_phone));
-}
-
-void Inventory::update_inventory_email(Inventory &inventory, const void *new_email) {
-    inventory.set_inventory_email(static_cast<const char *>(new_email));
-}
-
-struct MaterialsUpdate {
-    const Material *new_materials;
-    int new_materials_count;
-};
-
-void Inventory::update_inventory_materials(Inventory &inventory, const void *new_data) {
-    const auto *u = static_cast<const MaterialsUpdate *>(new_data);
-    inventory.set_inventory_materials(u->new_materials, u->new_materials_count);
-}
-
-struct ProvidersUpdate {
-    const Provider *new_providers;
-    int new_providers_count;
-};
-
-void Inventory::update_inventory_providers(Inventory &inventory, const void *new_data) {
-    const auto *u = static_cast<const ProvidersUpdate *>(new_data);
-    inventory.set_inventory_providers(u->new_providers, u->new_providers_count);
-}
-
-struct OrdersUpdate {
-    const Order *new_orders;
-    int new_orders_count;
-};
-
-void Inventory::update_inventory_orders(Inventory &inventory, const void *new_data) {
-    const auto *u = static_cast<const OrdersUpdate *>(new_data);
-    inventory.set_inventory_orders(u->new_orders, u->new_orders_count);
-}
-
-void Inventory::update_inventory(Inventory &inventory, void (*func)(Inventory &, const void *), const void *new_data) {
-    if (func == nullptr)
-        return;
-    func(inventory, new_data);
+void Inventory::set_inventory_orders(const std::span<const Order> new_inventory_orders) {
+    validate_inventory_orders(new_inventory_orders);
+    orders = std::vector(new_inventory_orders.begin(), new_inventory_orders.end());
 }
 
 // Metode care modifica starea obiectului
 void Inventory::add_material(const Material &material) {
-    // Alocam memorie pentru a putea adauga noul material si copiem materialele vechi
-    const auto new_materials = new Material[this->materials_count + 1];
-    for (int i = 0; i < this->materials_count; i++)
-        new_materials[i] = this->materials[i];
-    new_materials[this->materials_count++] = material;
-
-    // Eliberam memoria folosita anterior
-    delete[] this->materials;
-    this->materials = new_materials;
+    auto it = find_material_by_id(material.get_material_id());
+    if (it != nullptr) {
+        const double new_quantity = it->get_material_quantity() + material.get_material_quantity();
+        it->set_material_quantity(new_quantity);
+    } else {
+        materials.push_back(material);
+    }
 }
 
-void Inventory::add_provider(const Provider &provider) {
-    // Alocam memorie pentru a putea adauga noul furnizor si copiem furnizorii vechi
-    const auto new_providers = new Provider[this->providers_count + 1];
-    for (int i = 0; i < this->providers_count; i++)
-        new_providers[i] = this->providers[i];
-    new_providers[this->providers_count++] = provider;
+void Inventory::register_provider(const std::span<const Provider> available_providers) {
+    print_available_unregistered_providers(available_providers);
+    read_string("Enter provider ID to register", [this, available_providers](const std::string &input) {
+        auto it = std::ranges::find_if(available_providers, [&input](const Provider &p) { return p.get_provider_id() == input; });
+        if (it == available_providers.end())
+            throw std::invalid_argument("No provider with this ID found in the available providers list");
+        if (find_provider_by_id(it->get_provider_id()) != nullptr)
+            throw std::invalid_argument("Provider with this ID is already registered");
 
-    // Eliberam memoria folosita anterior
-    delete[] this->providers;
-    this->providers = new_providers;
+        providers.push_back(*it);
+    });
 }
 
-void Inventory::add_order(const Order &order) {
-    // Alocam memorie pentru a putea adauga noua comanda si copiem comenzile vechi
-    const auto new_orders = new Order[this->orders_count + 1];
-    for (int i = 0; i < this->orders_count; i++)
-        new_orders[i] = this->orders[i];
-    new_orders[this->orders_count++] = order;
+void Inventory::place_order() {
+    print_inventory_providers();
 
-    // Eliberam memoria folosita anterior
-    delete[] this->orders;
-    this->orders = new_orders;
+    Provider *selected_provider = nullptr;
+    read_string("Enter provider ID to place order", [this, &selected_provider](const std::string &s) {
+        selected_provider = find_provider_by_id(s);
+        if (selected_provider == nullptr)
+            throw std::invalid_argument("No provider with this ID found in the inventory providers list");
+    });
+
+    std::cout << *selected_provider;
+
+    Order new_order;
+    new_order.set_order_provider_id(selected_provider->get_provider_id());
+    new_order.set_order_status(Order::Status::pending);
+
+    read_string("Enter order ID", [&new_order](const std::string &s) { new_order.set_order_id(s); });
+    read_string("Enter order date (expected format: DD-MM-YYYY)", [&new_order](const std::string &s) { new_order.set_order_date(s); });
+
+    int cnt;
+    read_string("Enter number of materials to order", [&cnt, selected_provider](const std::string &s) {
+        cnt = std::stoi(s);
+        if (cnt <= 0)
+            throw std::invalid_argument("Number of materials to order must not be 0");
+        if (cnt > selected_provider->get_provider_materials_count())
+            throw std::invalid_argument("Number of materials to order must not exceed the number of materials provided");
+    });
+
+    std::vector<Order::OrderMaterial> buffer;
+    for (int i = 0; i < cnt; i++) {
+        Order::OrderMaterial order_material;
+
+        read_string("Enter material ID to order", [selected_provider, &order_material, &buffer](const std::string &s) {
+            const auto &provider_materials = selected_provider->get_provider_materials();
+            auto material_it = std::ranges::find_if(provider_materials, [&s](const Provider::ProviderMaterial &m) { return m.material_id == s; });
+            if (material_it == provider_materials.end())
+                throw std::invalid_argument("No material with this ID found in the provider materials list");
+
+            Order::order_material_already_exists(s, buffer);
+
+            order_material.material_id = material_it->material_id;
+            order_material.material_name = material_it->material_name;
+            order_material.material_category = material_it->material_category;
+            order_material.material_unit_price = material_it->material_unit_price;
+            order_material.material_measure_unit = material_it->material_measure_unit;
+        });
+
+        read_string("Enter material quantity to order", [&order_material](const std::string &s) {
+            const double quantity = std::stod(s);
+            if (quantity <= 0)
+                throw std::invalid_argument("Material quantity to order must be greater than 0");
+            order_material.material_quantity = quantity;
+        });
+
+        buffer.push_back(order_material);
+    }
+
+    new_order.set_order_materials(buffer);
+    orders.push_back(new_order);
 }
 
-Material *Inventory::find_material_by_id(const char *find_id) const {
-    if (find_id != nullptr)
-        for (int i = 0; i < this->materials_count; i++)
-            if (this->materials[i].get_material_id() != nullptr && strcmp(this->materials[i].get_material_id(), find_id) == 0)
-                return &this->materials[i];
-    return nullptr;
+void Inventory::consume_material() {
+    print_inventory_materials();
+
+    Material *selected_material = nullptr;
+    read_string("Enter material ID to send to building site", [this, &selected_material](const std::string &s) {
+        selected_material=find_material_by_id(s);
+        if (selected_material==nullptr)
+            throw std::invalid_argument("No material with this ID found in the inventory materials list");
+    });
+    read_string("Enter quantity to send to building site", [selected_material](const std::string &s) {
+        const double quantity = std::stod(s);
+        if (quantity <= 0)
+            throw std::invalid_argument("Material quantity to consume must be greater than 0");
+        if (quantity > selected_material->get_material_quantity())
+            throw std::invalid_argument("Material quantity to consume must not exceed the available quantity in inventory");
+
+        const double new_quantity = selected_material->get_material_quantity() - quantity;
+        selected_material->set_material_quantity(new_quantity);
+    });
 }
 
-Provider *Inventory::find_provider_by_id(const char *find_id) const {
-    if (find_id != nullptr)
-        for (int i = 0; i < this->providers_count; i++)
-            if (this->providers[i].get_provider_id() != nullptr && strcmp(this->providers[i].get_provider_id(), find_id) == 0)
-                return &this->providers[i];
-    return nullptr;
+Material *Inventory::find_material_by_id(const std::string_view find_id) {
+    auto it = std::ranges::find_if(materials, [find_id](const Material &m) { return m.get_material_id() == find_id; });
+    return it != materials.end() ? &(*it) : nullptr;
 }
 
-Order *Inventory::find_order_by_id(const char *find_id) const {
-    if (find_id != nullptr)
-        for (int i = 0; i < this->orders_count; i++)
-            if (this->orders[i].get_order_id() != nullptr && strcmp(this->orders[i].get_order_id(), find_id) == 0)
-                return &this->orders[i];
-    return nullptr;
+Provider *Inventory::find_provider_by_id(const std::string_view find_id) {
+    auto it = std::ranges::find_if(providers, [find_id](const Provider &p) {return p.get_provider_id()==find_id;});
+    return it != providers.end() ? &(*it) : nullptr;
+}
+
+Order *Inventory::find_order_by_id(const std::string_view find_id) {
+    auto it = std::ranges::find_if(orders, [find_id](const Order &o) { return o.get_order_id() == find_id; });
+    return it != orders.end() ? &(*it) : nullptr;
 }
 
 // Logica de sortare pentru atributele instantei curente
 void Inventory::sort_materials_by_name_ascending() {
-    for (int i = 0; i < this->materials_count - 1; i++)
-        for (int j = i + 1; j < this->materials_count; j++) {
-            const char *material_name_i = this->materials[i].get_material_name();
-            const char *material_name_j = this->materials[j].get_material_name();
-            if (material_name_i != nullptr && material_name_j != nullptr) {
-                if (strcmp(material_name_i, material_name_j) > 0)
-                    Material::swap(this->materials[i], this->materials[j]);
-            } else if (material_name_i == nullptr && material_name_j != nullptr)
-                Material::swap(this->materials[i], this->materials[j]);
-        }
+    std::ranges::sort(this->materials, [](const Material &a, const Material &b) {
+       return a.get_material_name() < b.get_material_name();
+    });
 }
 
 void Inventory::sort_materials_by_name_descending() {
-    for (int i = 0; i < this->materials_count - 1; i++)
-        for (int j = i + 1; j < this->materials_count; j++) {
-            const char *material_name_i = this->materials[i].get_material_name();
-            const char *material_name_j = this->materials[j].get_material_name();
-            if (material_name_i != nullptr && material_name_j != nullptr) {
-                if (strcmp(material_name_i, material_name_j) < 0)
-                    Material::swap(this->materials[i], this->materials[j]);
-            } else if (material_name_i == nullptr && material_name_j != nullptr)
-                Material::swap(this->materials[i], this->materials[j]);
-        }
+    std::ranges::sort(this->materials, [](const Material &a, const Material &b) {
+       return a.get_material_name() > b.get_material_name();
+    });
 }
 
 void Inventory::sort_materials_by_quantity_ascending() {
-    for (int i = 0; i < this->materials_count - 1; i++)
-        for (int j = i + 1; j < this->materials_count; j++)
-            if (this->materials[i].get_material_quantity() > this->materials[j].get_material_quantity())
-                Material::swap(this->materials[i], this->materials[j]);
+    std::ranges::sort(this->materials, [](const Material &a, const Material &b) {
+       return a.get_material_quantity() < b.get_material_quantity();
+    });
 }
 
 void Inventory::sort_materials_by_quantity_descending() {
-    for (int i = 0; i < this->materials_count - 1; i++)
-        for (int j = i + 1; j < this->materials_count; j++)
-            if (this->materials[i].get_material_quantity() < this->materials[j].get_material_quantity())
-                Material::swap(this->materials[i], this->materials[j]);
+    std::ranges::sort(this->materials, [](const Material &a, const Material &b) {
+       return a.get_material_quantity() > b.get_material_quantity();
+    });
 }
 
 void Inventory::sort_orders_by_total_price_ascending() {
-    for (int i = 0; i < this->orders_count - 1; i++)
-        for (int j = i + 1; j < this->orders_count; j++)
-            if (this->orders[i].get_order_total_price() > this->orders[j].get_order_total_price())
-                Order::swap(this->orders[i], this->orders[j]);
+    std::ranges::sort(this->orders, [](const Order &a, const Order &b) {
+       return a.get_order_total_price() < b.get_order_total_price();
+    });
 }
 
 void Inventory::sort_orders_by_total_price_descending() {
-    for (int i = 0; i < this->orders_count - 1; i++)
-        for (int j = i + 1; j < this->orders_count; j++)
-            if (this->orders[i].get_order_total_price() < this->orders[j].get_order_total_price())
-                Order::swap(this->orders[i], this->orders[j]);
-}
-
-// Extragerea comenzilor in functie de ID-ul furnizorului
-Order *Inventory::get_orders_by_provider_id(const char *provider_id, int &result_count) {
-    if (provider_id == nullptr) {
-        result_count = 0;
-        return nullptr;
-    }
-
-    const auto *to_search_orders = this->get_inventory_orders();
-    result_count = 0;
-    for (int i = 0; i < this->orders_count; i++)
-        if (to_search_orders[i].get_order_provider_id() != nullptr && strcmp(to_search_orders[i].get_order_provider_id(), provider_id) == 0)
-            result_count++;
-
-    if (result_count == 0)
-        return nullptr;
-
-    auto *result = new Order[result_count];
-    int index = 0;
-    for (int i = 0; i < this->orders_count; i++)
-        if (to_search_orders[i].get_order_provider_id() != nullptr && strcmp(to_search_orders[i].get_order_provider_id(), provider_id) == 0)
-            result[index++] = to_search_orders[i];
-
-    return result;
-}
-
-// Extragerea materialelor care au un stoc critic
-Material *Inventory::get_critical_materials(int &result_count) {
-    result_count = 0;
-    auto const *to_search_materials = this->get_inventory_materials();
-    for (int i = 0; i < this->get_inventory_materials_count(); i++)
-        if (to_search_materials[i].get_material_critical() >= to_search_materials[i].get_material_quantity())
-            result_count++;
-
-    if (result_count == 0)
-        return nullptr;
-
-    auto *result = new Material[result_count];
-    int index = 0;
-    for (int i = 0; i < this->get_inventory_materials_count(); i++)
-        if (to_search_materials[i].get_material_critical() >= to_search_materials[i].get_material_quantity())
-            result[index++] = to_search_materials[i];
-
-    return result;
-}
-
-// Extragerea elementelor care fac parte dintr-o categorie anume
-Material *Inventory::get_materials_by_category(const Material::Category &category, int &result_count) {
-    result_count = 0;
-    auto const *to_search_materials = this->get_inventory_materials();
-
-    for (int i = 0; i < this->materials_count; i++)
-        if (to_search_materials[i].get_material_category() == category)
-            result_count++;
-
-    if (result_count == 0)
-        return nullptr;
-
-    auto *result = new Material[result_count];
-    int index = 0;
-    for (int i = 0; i < this->materials_count; i++)
-        if (to_search_materials[i].get_material_category() == category)
-            result[index++] = to_search_materials[i];
-
-    return result;
-}
-
-// Logica de Business a inventarului
-// Modificarea starii obiectelor interconectate
-void Inventory::consume_material(const char *material_id, const double &quantity) {
-    Material *material = this->find_material_by_id(material_id);
-
-    if (material == nullptr)
-        return;
-
-    const double new_quantity = material->get_material_quantity() - quantity;
-
-    if (new_quantity < 0)
-        return;
-
-    Material::update_material(*material, Material::update_material_quantity, &new_quantity);
-}
-
-// Receptionarea unei comenzi
-void Inventory::receive_order(Order *order) {
-    // Verificam existenta comenzii
-    if (order == nullptr)
-        return;
-
-    // Verificam state-ul comenzii
-    // Nu o putem procesa de 2 ori sau daca a fost anulata
-    if (order->get_order_status() != Order::Status::pending)
-        return;
-
-    // Extragem informatia din obiectul order
-    char **materials_id = order->get_order_materials_id();
-    const double *quantities = order->get_order_quantities();
-    const int order_materials_count = order->get_order_materials_count();
-
-    if (materials_id == nullptr || quantities == nullptr || order_materials_count == 0)
-        return;
-
-    // Adaugam elementele noi care lipsesc din inventarul curent
-    for (int i = 0; i < order_materials_count; i++) {
-        if (this->find_material_by_id(materials_id[i]) == nullptr) {
-            Material new_material(materials_id[i], "", "", 0.0, 0.0, 0.0, Material::Category::others);
-            add_material(new_material);
-        }
-    }
-
-    // Actualizam quantity pentru toate elementele implicate din comanda
-    for (int i = 0; i < order_materials_count; i++) {
-        Material *material = this->find_material_by_id(materials_id[i]);
-        if (material != nullptr) {
-            double new_quantity = material->get_material_quantity() + quantities[i];
-            Material::update_material(*material, Material::update_material_quantity, &new_quantity);
-        }
-    }
-
-    // Finalizam procesul modificand state-ul obiectului Order primit la delivered
-    constexpr auto new_status = Order::Status::delivered;
-    Order::update_order(*order, Order::update_order_status, &new_status);
-}
-
-// Calcularea intregii valori a inventarului
-double Inventory::calculate_inventory_value() const {
-    double total = 0;
-    for (int i = 0; i < this->materials_count; i++)
-        total += this->materials[i].get_material_quantity() * this->materials[i].get_material_unit_price();
-
-    return total;
+    std::ranges::sort(this->orders, [](const Order &a, const Order &b) {
+       return a.get_order_total_price() > b.get_order_total_price();
+    });
 }
 
 // Supraincarcarea operatorului de atribuire
 // Nu mai este nevoie sa initializam pointerii la nullptr pentru ca avem garantia constructorilor ca putem sterge zonele de memorie alocate
-Inventory &Inventory::operator=(const Inventory &other) {
-    if (this == &other)
-        return *this;
-
-    set_inventory_id(other.get_inventory_id());
-    set_inventory_name(other.get_inventory_name());
-    set_inventory_address(other.get_inventory_address());
-    set_inventory_phone(other.get_inventory_phone());
-    set_inventory_email(other.get_inventory_email());
-    set_inventory_materials(other.get_inventory_materials(), other.get_inventory_materials_count());
-    set_inventory_providers(other.get_inventory_providers(), other.get_inventory_providers_count());
-    set_inventory_orders(other.get_inventory_orders(), other.get_inventory_orders_count());
+Inventory &Inventory::operator=(Inventory other) {
+    std::swap(this->id, other.id);
+    std::swap(this->name, other.name);
+    std::swap(this->address, other.address);
+    std::swap(this->phone, other.phone);
+    std::swap(this->email, other.email);
+    std::swap(this->materials, other.materials);
+    std::swap(this->providers, other.providers);
+    std::swap(this->orders, other.orders);
 
     return *this;
 }
@@ -479,149 +260,167 @@ Inventory &Inventory::operator=(const Inventory &other) {
 // Supraincarcarea operatorilor relationali
 // Aplicam si aici verificari ale validitatii datelor pentru a putea folosi strcmp
 bool Inventory::operator==(const Inventory &other) const {
-    if ((this->id == nullptr) != (other.id == nullptr)) return false;
-    if (this->id != nullptr && other.id != nullptr && strcmp(this->id, other.id) != 0) return false;
-
-    if ((this->name == nullptr) != (other.name == nullptr)) return false;
-    if (this->name != nullptr && other.name != nullptr && strcmp(this->name, other.name) != 0) return false;
-
-    if ((this->address == nullptr) != (other.address == nullptr)) return false;
-    if (this->address != nullptr && other.address != nullptr && strcmp(this->address, other.address) != 0) return false;
-
-    if ((this->phone == nullptr) != (other.phone == nullptr)) return false;
-    if (this->phone != nullptr && other.phone != nullptr && strcmp(this->phone, other.phone) != 0) return false;
-
-    if ((this->email == nullptr) != (other.email == nullptr)) return false;
-    if (this->email != nullptr && other.email != nullptr && strcmp(this->email, other.email) != 0) return false;
-
-    if (this->materials_count != other.materials_count) return false;
-    if (this->providers_count != other.providers_count) return false;
-    if (this->orders_count != other.orders_count) return false;
-
-    if ((this->materials == nullptr) != (other.materials == nullptr)) return false;
-    if (this->materials != nullptr)
-        for (int i = 0; i < this->materials_count; i++)
-            if (this->materials[i] != other.materials[i]) return false;
-
-    if ((this->providers == nullptr) != (other.providers == nullptr)) return false;
-    if (this->providers != nullptr)
-        for (int i = 0; i < this->providers_count; i++)
-            if (this->providers[i] != other.providers[i]) return false;
-
-    if ((this->orders == nullptr) != (other.orders == nullptr)) return false;
-    if (this->orders != nullptr)
-        for (int i = 0; i < this->orders_count; i++)
-            if (this->orders[i] != other.orders[i]) return false;
-
-    return true;
+    return id == other.id &&
+           name == other.name &&
+           address == other.address &&
+           phone == other.phone &&
+           email == other.email &&
+           std::ranges::equal(materials, other.materials) &&
+           std::ranges::equal(providers, other.providers) &&
+           std::ranges::equal(orders, other.orders);
 }
 
 bool Inventory::operator!=(const Inventory &other) const {
     return !(*this == other);
 }
 
-// Supraincarcarea operatorilor de I/O
-std::istream &operator>>(std::istream &is, Inventory &inventory) {
-    char inventory_id[256];
-    char inventory_name[256];
-    char inventory_address[256];
-    char inventory_phone[256];
-    char inventory_email[256];
-    int inventory_materials_count;
-    int inventory_providers_count;
-    int inventory_orders_count;
-
-    std::cout << "Enter inventory ID: ";
-    is >> inventory_id;
-    inventory.set_inventory_id(inventory_id);
-
-    std::cout << "Enter inventory name: ";
-    is >> inventory_name;
-    inventory.set_inventory_name(inventory_name);
-
-    std::cout << "Enter address: ";
-    is >> inventory_address;
-    inventory.set_inventory_address(inventory_address);
-
-    std::cout << "Enter phone: ";
-    is >> inventory_phone;
-    inventory.set_inventory_phone(inventory_phone);
-
-    std::cout << "Enter email: ";
-    is >> inventory_email;
-    inventory.set_inventory_email(inventory_email);
-
-    // Setarea capacitatilor memoriei viitoare
-    std::cout << "Enter number of materials: ";
-    is >> inventory_materials_count;
-
-    std::cout << "Enter number of providers: ";
-    is >> inventory_providers_count;
-
-    std::cout << "Enter number of orders: ";
-    is >> inventory_orders_count;
-
-    for (int i = 0; i < inventory_materials_count; i++) {
-        std::cout << "\n-- Material " << i + 1 << " --\n";
-        Material material;
-        is >> material;
-        inventory.add_material(material);
-    }
-
-    for (int i = 0; i < inventory_providers_count; i++) {
-        std::cout << "\n-- Provider " << i + 1 << " --\n";
-        Provider provider;
-        is >> provider;
-        inventory.add_provider(provider);
-    }
-
-    for (int i = 0; i < inventory_orders_count; i++) {
-        std::cout << "\n-- Order " << i + 1 << " --\n";
-        Order order;
-        is >> order;
-        inventory.add_order(order);
-    }
-
-    return is;
-}
-
+// Supraincarcarea operatorului de output
 std::ostream &operator<<(std::ostream &os, const Inventory &inventory) {
-    os << "[ " << (inventory.id ? inventory.id : "N/A") << " ] " << (inventory.name ? inventory.name : "N/A") << "\n";
-    os << "  Address    : " << (inventory.address ? inventory.address : "N/A") << "\n";
-    os << "  Phone      : " << (inventory.phone ? inventory.phone : "N/A") << "\n";
-    os << "  Email      : " << (inventory.email ? inventory.email : "N/A") << "\n";
-    os << "  Materials  : " << inventory.materials_count << "\n";
-    os << "  Providers  : " << inventory.providers_count << "\n";
-    os << "  Orders     : " << inventory.orders_count << "\n\n";
+    os << inventory.id << "  " << inventory.name << "\n";
+    os << "|  Address    : " << inventory.address << "\n";
+    os << "|  Phone      : " << inventory.phone << "\n";
+    os << "|  Email      : " << inventory.email << "\n";
+    os << "|  Materials  : " << inventory.get_inventory_materials_count() << "\n";
+    os << "|  Providers  : " << inventory.get_inventory_providers_count() << "\n";
+    os << "|  Orders     : " << inventory.get_inventory_orders_count() << "\n";
+    os << "|_\n\n";
 
     return os;
 }
 
-bool Inventory::verify_inventory_email(const char *email) {
-    if (email == nullptr)
-        return false;
-
-    const char *at_pos = strchr(email, '@');
-    if (at_pos == nullptr || at_pos == email || at_pos >= email + strlen(email) - 1)
-        return false;
-
-    const char *dot_pos = strrchr(at_pos, '.');
-    if (dot_pos == nullptr || dot_pos == at_pos + 1 || dot_pos >= email + strlen(email) - 1)
-        return false;
-
-    return true;
+// Functii helper
+void Provider::read_string(const std::string_view prompt, auto setter) {
+    while (true) {
+        try {
+            std::cout << prompt << ": ";
+            std::string temp;
+            std::getline(std::cin, temp);
+            setter(temp);
+            break;
+        } catch (const std::invalid_argument &e) {
+            std::cout << "Error: " << e.what() << ". Try again.\n";
+        } catch (const std::out_of_range &) {
+            std::cout << "Error: value out of range. Try again.\n";
+        }
+    }
 }
 
-bool Inventory::verify_inventory_phone(const char *phone) {
-    if (phone == nullptr)
-        return false;
+void Inventory::print_available_unregistered_providers(const std::span<const Provider> available_providers) {
+    std::cout << "Available unregistered providers:\n\n";
+    for (const auto &provider : available_providers)
+        if (this->find_provider_by_id(provider.get_provider_id()) == nullptr)
+            std::cout << provider << "\n";
+    std::cout << "\n";
+}
 
-    if (strlen(phone) != 10)
-        return false;
+void Inventory::print_inventory_providers() const {
+    std::cout << "Registered providers:\n\n";
+    for (const auto &provider : providers)
+        std::cout << provider << "\n";
+    std::cout << "\n";
+}
 
-    for (int i = 0; i < 10; i++)
-        if (phone[i] < '0' || phone[i] > '9')
-            return false;
+void Inventory::print_inventory_materials() const {
+    std::cout << "Registered materials:\n\n";
+    for (const auto &material : materials)
+        std::cout << material << "\n";
+    std::cout << "\n";
+}
 
-    return true;
+void Inventory::print_inventory_orders() const {
+    std::cout << "Registered orders:\n\n";
+    for (const auto &order : orders)
+        std::cout << order << "\n";
+    std::cout << "\n";
+}
+
+void Inventory::validate_inventory_id(const std::string_view new_inventory_id) {
+    if (new_inventory_id.empty())
+        throw std::invalid_argument("Inventory ID cannot be empty");
+    static const std::regex id_regex("^INV-[0-9]{5}$");
+    if (!std::regex_match(new_inventory_id.begin(), new_inventory_id.end(), id_regex)) {
+        throw std::invalid_argument("Invalid inventory ID format (expected format: INV-#####");
+    }
+}
+
+void Inventory::validate_inventory_name(const std::string_view new_inventory_name) {
+    if (new_inventory_name.empty()) {
+        throw std::invalid_argument("Inventory name must not be empty");
+    }
+    if (std::ranges::all_of(new_inventory_name, [](const unsigned char c) { return std::isspace(c); })) {
+        throw std::invalid_argument("Inventory name must contain at least one non-space character");
+    }
+    if (!std::ranges::all_of(new_inventory_name, [](const unsigned char c) { return std::isalnum(c) || std::isspace(c); })) {
+        throw std::invalid_argument("Inventory name must contain only letters, numbers and spaces");
+    }
+}
+
+void Inventory::validate_inventory_address(const std::string_view new_inventory_address) {
+    if (new_inventory_address.empty()) {
+        throw std::invalid_argument("Provider address must not be empty");
+    }
+    if (std::ranges::all_of(new_inventory_address, [](const unsigned char c) { return std::isspace(c); })) {
+        throw std::invalid_argument("Provider address must contain at least one non-space character");
+    }
+    if (!std::ranges::all_of(new_inventory_address, [](const unsigned char c) { return std::isalnum(c) || std::isspace(c); })) {
+        throw std::invalid_argument("Provider address must contain only letters, numbers and spaces");
+    }
+}
+
+void Inventory::validate_inventory_phone(const std::string_view new_inventory_phone) {
+    if (new_inventory_phone.empty()) {
+        throw std::invalid_argument("Provider phone number must not be empty");
+    }
+    static const std::regex phone_regex("^[0-9]{10}$");
+    if (!std::regex_match(new_inventory_phone.begin(), new_inventory_phone.end(), phone_regex)) {
+        throw std::invalid_argument("Invalid provider phone number format (expected format: 10 digits)");
+    }
+}
+
+void Inventory::validate_inventory_email(const std::string_view new_inventory_email) {
+    if (new_inventory_email.empty()) {
+        throw std::invalid_argument("Provider email must not be empty");
+    }
+    static const std::regex email_regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    if (!std::regex_match(new_inventory_email.begin(), new_inventory_email.end(), email_regex)) {
+        throw std::invalid_argument("Invalid provider email format");
+    }
+}
+
+void Inventory::validate_inventory_materials(const std::span<const Material> new_inventory_materials) {
+    if (new_inventory_materials.empty()) {
+        throw std::invalid_argument("Inventory materials must not be empty");
+    }
+    for (const auto &material : new_inventory_materials) {
+        Material::validate_material_id(material.get_material_id());
+        Material::validate_material_name(material.get_material_name());
+        Material::validate_material_quantity(material.get_material_quantity());
+        Material::validate_material_measure_unit(material.get_material_measure_unit());
+        Material::validate_material_unit_price(material.get_material_unit_price());
+    }
+}
+
+void Inventory::validate_inventory_providers(const std::span<const Provider> new_inventory_providers) {
+    if (new_inventory_providers.empty()) {
+        throw std::invalid_argument("Inventory providers must not be empty");
+    }
+    for (const auto &provider : new_inventory_providers) {
+        Provider::validate_provider_id(provider.get_provider_id());
+        Provider::validate_provider_name(provider.get_provider_name());
+        Provider::validate_provider_address(provider.get_provider_address());
+        Provider::validate_provider_phone(provider.get_provider_phone());
+        Provider::validate_provider_email(provider.get_provider_email());
+        Provider::validate_provider_materials(provider.get_provider_materials());
+    }
+}
+
+void Inventory::validate_inventory_orders(const std::span<const Order> new_inventory_orders) {
+    if (new_inventory_orders.empty()) {
+        throw std::invalid_argument("Inventory orders must not be empty");
+    }
+    for (const auto &order : new_inventory_orders) {
+        Order::validate_order_id(order.get_order_id());
+        Order::validate_order_date(order.get_order_date());
+        Order::validate_order_materials(order.get_order_materials());
+    }
 }

@@ -14,8 +14,9 @@ public:
     struct ProviderMaterial {
         std::string material_id;
         std::string material_name;
+        std::string material_measure_unit;
         Material::Category material_category;
-        double unit_price;
+        double material_unit_price;
     };
 
     // Constructorul implicit
@@ -72,8 +73,9 @@ public:
     static void validate_provider_materials(std::span<const ProviderMaterial> new_provider_materials);
     static void validate_provider_materials_number(int new_provider_materials_number);
     static void provider_material_already_exists(std::string_view material_id, std::span<const ProviderMaterial> materials);
-    static void read_string(const std::string &prompt, auto setter);
+    static void read_string(std::string_view prompt, auto setter);
     static void read_material(ProviderMaterial &material, std::span<const ProviderMaterial> materials);
+    static void print_available_materials(std::span<const ProviderMaterial> available_materials);
 
 private:
     std::string id; // ID-ul furnizorului
@@ -87,4 +89,5 @@ private:
     static void set_provider_material_id(ProviderMaterial &material, std::string_view new_provider_material_id, std::span<const ProviderMaterial> materials);
     static void set_provider_material_name(ProviderMaterial &material, std::string_view new_provider_material_name);
     static void set_provider_material_unit_price(ProviderMaterial &material, double new_provider_material_unit_price);
+    static void set_provider_material_measure_unit(ProviderMaterial &material, std::string_view new_provider_material_measure_unit);
 };
