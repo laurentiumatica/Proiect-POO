@@ -14,13 +14,16 @@ protected:
     std::vector<Material> materials;
     bool processed = false; // Flag pentru a preveni procesarea multipla
 
+    // Constructor default
     Transaction();
 
+    // Constructor cu parametri
     Transaction(std::string id, std::string date, std::vector<Material> materials);
 
+    // Constructor de copiere
     Transaction(const Transaction &other);
 
-    // Operator de atribuire explicit (previne avertismentul deprecated-copy)
+    // Operator de atribuire explicit
     Transaction &operator=(const Transaction &other) = default;
 
     // Functii pur virtuale
@@ -28,6 +31,7 @@ protected:
     virtual void do_print(std::ostream &os) const = 0;
 
 public:
+    // Destructor virtual
     virtual ~Transaction();
 
     // NVI
@@ -40,8 +44,6 @@ public:
 
     // Getters
     const std::string &get_transaction_id() const;
-    const std::string &get_transaction_date() const;
-    const std::vector<Material> &get_transaction_materials() const;
     double get_transaction_total_price() const;
     bool is_processed() const;
 };
@@ -99,10 +101,6 @@ public:
     // Destructor
     ~ConsumptionRecord() override;
 
-    // Getters
-    const std::string &get_consumption_record_project_name() const;
-    const std::string &get_consumption_record_department() const;
-
     // Functii virtuale
     std::unique_ptr<Transaction> clone() const override;
 
@@ -130,8 +128,6 @@ public:
     ~ReturnTransaction() override;
 
     // Getters
-    const std::string &get_return_transaction_original_transaction_id() const;
-    const std::string &get_return_transaction_reason() const;
     double get_return_transaction_price() const;
 
     // Functii virtuale
@@ -160,9 +156,6 @@ public:
 
     // Destructor
     ~AdjustmentTransaction() override;
-
-    // Getters
-    const std::string &get_adjustment_transaction_reason() const;
 
     // Functii virtuale
     std::unique_ptr<Transaction> clone() const override;

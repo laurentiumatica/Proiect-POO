@@ -31,8 +31,6 @@ Transaction::~Transaction() = default;
 
 // Getters
 const std::string &Transaction::get_transaction_id() const { return id; }
-const std::string &Transaction::get_transaction_date() const { return date; }
-const std::vector<Material> &Transaction::get_transaction_materials() const { return materials; }
 
 double Transaction::get_transaction_total_price() const {
     double total_price = 0;
@@ -163,10 +161,6 @@ ConsumptionRecord::ConsumptionRecord(const ConsumptionRecord &other)
 // Destructor
 ConsumptionRecord::~ConsumptionRecord() = default;
 
-// Getters
-const std::string &ConsumptionRecord::get_consumption_record_project_name() const { return project_name; }
-const std::string &ConsumptionRecord::get_consumption_record_department() const { return department; }
-
 // Functii virtuale
 std::unique_ptr<Transaction> ConsumptionRecord::clone() const {
     return std::make_unique<ConsumptionRecord>(*this);
@@ -220,17 +214,12 @@ ReturnTransaction::ReturnTransaction(std::string id, std::string date, std::vect
 ReturnTransaction::ReturnTransaction(const ReturnTransaction &other)
     : Transaction(other.id, other.date, other.materials), original_transaction_id(other.original_transaction_id),
       reason(other.reason), return_amount(other.return_amount) {
+    validate_transaction_id(this->original_transaction_id);
+    validate_refund_transaction_reason(this->reason);
 }
 
 // Destructor
 ReturnTransaction::~ReturnTransaction() = default;
-
-// Getters
-const std::string &ReturnTransaction::get_return_transaction_reason() const { return reason; }
-
-const std::string &ReturnTransaction::get_return_transaction_original_transaction_id() const {
-    return original_transaction_id;
-}
 
 double ReturnTransaction::get_return_transaction_price() const { return return_amount; }
 
@@ -287,9 +276,6 @@ AdjustmentTransaction::AdjustmentTransaction(const AdjustmentTransaction &other)
     : Transaction(other.id, other.date, other.materials), reason(other.reason) {}
 
 AdjustmentTransaction::~AdjustmentTransaction() = default;
-
-// Getters
-const std::string &AdjustmentTransaction::get_adjustment_transaction_reason() const { return reason; }
 
 // Functii virtuale
 std::unique_ptr<Transaction> AdjustmentTransaction::clone() const {

@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
-#include <cmath>
 #include <iomanip>
 
 // Constructorul default
@@ -71,21 +70,6 @@ Material &Material::operator=(Material other) {
     return *this;
 }
 
-// Supraincarcarea operatorilor relationali
-bool Material::operator==(const Material &other) const {
-    constexpr double epsilon = 1e-9;
-
-    return id == other.id &&
-           name == other.name &&
-           measure_unit == other.measure_unit &&
-           std::abs(quantity - other.quantity) < epsilon &&
-           std::abs(critical - other.critical) < epsilon &&
-           std::abs(unit_price - other.unit_price) < epsilon &&
-           category == other.category;
-}
-
-bool Material::operator!=(const Material &other) const { return !(*this == other); }
-
 // Supraincarcarea operatorilor de I/O
 std::ostream &operator<<(std::ostream &os, const Material &material) {
     const std::string category = Material::material_category_to_string(material.category);
@@ -131,17 +115,6 @@ std::istream &operator>>(std::istream &is, Material &material) {
     material = Material(id, name, measure_unit, std::stod(quantity), std::stod(critical), std::stod(unit_price), category);
 
     return is;
-}
-
-// Interschimbare
-void Material::swap(Material &material1, Material &material2) noexcept {
-    std::swap(material1.id, material2.id);
-    std::swap(material1.name, material2.name);
-    std::swap(material1.measure_unit, material2.measure_unit);
-    std::swap(material1.quantity, material2.quantity);
-    std::swap(material1.critical, material2.critical);
-    std::swap(material1.unit_price, material2.unit_price);
-    std::swap(material1.category, material2.category);
 }
 
 // Convertor category la string

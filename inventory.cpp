@@ -41,11 +41,6 @@ Inventory::Inventory(const Inventory &other) {
 Inventory::~Inventory() = default;
 
 // Getters
-const std::string &Inventory::get_inventory_id() const { return id; }
-const std::string &Inventory::get_inventory_name() const { return name; }
-const std::string &Inventory::get_inventory_address() const { return address; }
-const std::string &Inventory::get_inventory_phone() const { return phone; }
-const std::string &Inventory::get_inventory_email() const { return email; }
 const std::vector<Material> &Inventory::get_inventory_materials() const { return materials; }
 const std::vector<Provider> &Inventory::get_inventory_providers() const { return providers; }
 const std::vector<std::unique_ptr<Transaction> > &Inventory::get_inventory_transactions() const { return transactions; }
@@ -359,7 +354,7 @@ void Inventory::process_transaction() {
     if (it == transactions.end())
         throw ResourceNotFoundException("Transaction with ID " + transaction_id + " not found in inventory");
 
-    // Verificare universala — nicio tranzactie nu poate fi procesata de doua ori
+    // Verificare universala, nicio tranzactie nu poate fi procesata de doua ori
     if ((*it)->is_processed())
         throw ValidationException("Transaction has already been processed");
 

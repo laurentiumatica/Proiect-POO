@@ -37,16 +37,9 @@ public:
     // Supraincarcarea operatorului de atribuire
     Material &operator=(Material other);
 
-    // Supraincarcarea operatorilor relationali
-    bool operator==(const Material &other) const; // Verifica egalitatea
-    bool operator!=(const Material &other) const; // Verifica inegalitatea
-
     // Supraincarcarea operatorilor de I/O
     friend std::istream &operator>>(std::istream &is, Material &material);
     friend std::ostream &operator<<(std::ostream &os, const Material &material);
-
-    // Interschimbare
-    static void swap(Material &material1, Material &material2) noexcept;
 
     // Convertor category la string
     static std::string material_category_to_string(Category category);

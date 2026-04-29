@@ -31,11 +31,6 @@ public:
     void set_inventory_materials(std::vector<Material> set_materials);
 
     // Getters
-    const std::string &get_inventory_id() const; // Returnează ID-ul
-    const std::string &get_inventory_name() const; // Returnează numele
-    const std::string &get_inventory_address() const; // Returnează adresa
-    const std::string &get_inventory_phone() const; // Returnează telefonul
-    const std::string &get_inventory_email() const; // Returnează email-ul
     const std::vector<Material> &get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
     const std::vector<Provider> &get_inventory_providers() const; // Returnează tabloul de furnizori
     const std::vector<std::unique_ptr<Transaction>> &get_inventory_transactions() const; // Returnează tabloul de comenzi

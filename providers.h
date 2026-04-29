@@ -32,16 +32,9 @@ public:
     // Supraincarcarea operatorului de atribuire
     Provider &operator=(Provider other);
 
-    // Supraincarcarea operatorilor relationali
-    bool operator==(const Provider &other) const; // Returneaza true daca au atributele identice
-    bool operator!=(const Provider &other) const; // Returneaza true daca cel putin un atribut difera
-
     // Supraincarcarea operatorilor de I/O
     friend std::istream &operator>>(std::istream &is, Provider &provider);
     friend std::ostream &operator<<(std::ostream &os, const Provider &provider);
-
-    // Interschimbare
-    static void swap(Provider &provider1, Provider &provider2) noexcept;
 
     // Functii helper
     static void print_available_materials(const std::vector<Material> &materials);

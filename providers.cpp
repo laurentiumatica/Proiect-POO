@@ -49,17 +49,6 @@ Provider &Provider::operator=(Provider other) {
     return *this;
 }
 
-// Supraincarcarea operatorilor relationali
-bool Provider::operator==(const Provider &other) const {
-    return id == other.id &&
-           name == other.name &&
-           phone == other.phone &&
-           email == other.email &&
-           address == other.address &&
-           std::ranges::equal(materials, other.materials, [](const Material &m1, const Material &m2) { return m1 == m2; });
-}
-bool Provider::operator!=(const Provider &other) const { return !(*this == other); }
-
 // Supraincarcarea operatorilor de I/O
 std::istream &operator>>(std::istream &is, Provider &provider) {
     std::vector<Material> buffer;
@@ -113,16 +102,6 @@ std::ostream &operator<<(std::ostream &os, const Provider &provider) {
     os << "|_\n\n";
 
     return os;
-}
-
-// Interschimbare
-void Provider::swap(Provider &provider1, Provider &provider2) noexcept {
-    std::swap(provider1.id, provider2.id);
-    std::swap(provider1.name, provider2.name);
-    std::swap(provider1.phone, provider2.phone);
-    std::swap(provider1.email, provider2.email);
-    std::swap(provider1.address, provider2.address);
-    std::swap(provider1.materials, provider2.materials);
 }
 
 // Functii helper
