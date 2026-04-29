@@ -14,27 +14,25 @@ public:
     Material(const Material &other);
 
     // Constructorul cu parametri
-    Material(std::string_view new_material_id,std::string_view new_material_name, std::string_view new_material_measure_unit,
-             double new_material_quantity, double new_material_critical, double new_material_unit_price,
-             Category new_material_category);
+    Material(std::string id,std::string name, std::string measure_unit,
+             double quantity, double critical, double unit_price, Category category);
 
     // Destructorul clasei
     ~Material();
 
-    // Getters
-    // Cuvantul cheie const de la final garanteaza ca aceste metode nu vor modifica starea instantei
-    // Const de la inceput garanteaza ca cel care primeste rezultatul nu-l poate modifica
-    [[nodiscard]] const std::string& get_material_id() const; // Returneaza identificatorul unic
-    [[nodiscard]] const std::string& get_material_name() const; // Returneaza numele materialului
-    [[nodiscard]] const std::string& get_material_measure_unit() const; // Returneaza unitatea de masura
-    [[nodiscard]] double get_material_critical() const; // Returneaza pragul critic de stoc
-    [[nodiscard]] double get_material_unit_price() const; // Returneaza pretul pe unitate
-    [[nodiscard]] double get_material_quantity() const; // Returneaza cantitatea curenta disponibila
-    [[nodiscard]] Category get_material_category() const; // Returneaza categoria din enumerarea de mai sus
+    // Setters
+    void set_material_critical(double set_critical); // Actualizeaza limita critica
+    void set_material_unit_price(double set_unit_price); // Actualizeaza pretul unitar
+    void set_material_quantity(double set_quantity); // Actualizeaza cantitatea
 
-    // Supraincarcarea operatorilor de I/O
-    friend std::istream &operator>>(std::istream &is, Material &material);
-    friend std::ostream &operator<<(std::ostream &os, const Material &material);
+    // Getters
+    const std::string& get_material_id() const; // Returneaza identificatorul unic
+    const std::string& get_material_name() const; // Returneaza numele materialului
+    const std::string& get_material_measure_unit() const; // Returneaza unitatea de masura
+    double get_material_critical() const; // Returneaza pragul critic de stoc
+    double get_material_unit_price() const; // Returneaza pretul pe unitate
+    double get_material_quantity() const; // Returneaza cantitatea curenta disponibila
+    Category get_material_category() const; // Returneaza categoria din enumerarea de mai sus
 
     // Supraincarcarea operatorului de atribuire
     Material &operator=(Material other);
@@ -43,29 +41,15 @@ public:
     bool operator==(const Material &other) const; // Verifica egalitatea
     bool operator!=(const Material &other) const; // Verifica inegalitatea
 
-    // Convertor category la string
-    static std::string_view material_category_to_string(Category category);
+    // Supraincarcarea operatorilor de I/O
+    friend std::istream &operator>>(std::istream &is, Material &material);
+    friend std::ostream &operator<<(std::ostream &os, const Material &material);
 
     // Interschimbare
     static void swap(Material &material1, Material &material2) noexcept;
 
-    // Setters
-    void set_material_id(std::string_view new_material_id); // Aloca memorie si actualizeaza ID-ul
-    void set_material_name(std::string_view new_material_name); // Aloca memorie si actualizeaza numele
-    void set_material_measure_unit(std::string_view new_material_measure_unit); // Aloca memorie si actualizeaza unitatea de masura
-    void set_material_critical(double new_material_critical); // Actualizeaza limita critica
-    void set_material_unit_price(double new_material_unit_price); // Actualizeaza pretul unitar
-    void set_material_quantity(double new_material_quantity); // Actualizeaza cantitatea
-    void set_material_category(Category new_material_category); // Actualizeaza categoria
-
-    // Functii helper
-    static void validate_material_id(std::string_view new_material_id); // Validare ID
-    static void validate_material_name(std::string_view new_material_name); // Validare nume
-    static void validate_material_measure_unit(std::string_view new_material_measure_unit); // Validare unitate de masura
-    static void validate_material_quantity(double new_material_quantity); // Validare cantitate
-    static void validate_material_critical(double new_material_critical); // Validare limita critica
-    static void validate_material_unit_price(double new_material_unit_price); // Validare pret unitar
-    static void read_string(std::string_view prompt, auto setter); // Functie helper pentru citirea stringurilor cu validare
+    // Convertor category la string
+    static std::string material_category_to_string(Category category);
 
 private:
     std::string id; // ID-ul materialului

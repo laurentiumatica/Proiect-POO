@@ -1,7 +1,10 @@
 #pragma once
 #include "materials.h"
-#include "orders.h"
+#include "transactions.h"
 #include "providers.h"
+#include <memory>
+#include <algorithm>
+#include <iostream>
 
 class Inventory {
 public:
@@ -12,79 +15,90 @@ public:
     Inventory(const Inventory &other);
 
     // Constructor cu parametri
-    Inventory(std::string_view new_inventory_id, std::string_view new_inventory_name, std::string_view new_inventory_address,
-              std::string_view new_inventory_phone, std::string_view new_inventory_email,
-              std::span<const Material> new_inventory_materials, std::span<const Provider> new_inventory_providers,
-              std::span<const Order> new_inventory_orders);
+    Inventory(std::string id, std::string name, std::string address,
+              std::string phone, std::string email,
+              std::vector<Material> materials, std::vector<Provider> providers,
+              std::vector<std::unique_ptr<Transaction>> transactions);
 
     // Destructor
     ~Inventory();
 
+    // Setters
+    void set_inventory_name(std::string set_name);
+    void set_inventory_address(std::string set_address);
+    void set_inventory_phone(std::string set_phone);
+    void set_inventory_email(std::string set_email);
+    void set_inventory_materials(std::vector<Material> set_materials);
+
     // Getters
-    [[nodiscard]] const std::string &get_inventory_id() const; // Returnează ID-ul
-    [[nodiscard]] const std::string &get_inventory_name() const; // Returnează numele
-    [[nodiscard]] const std::string &get_inventory_address() const; // Returnează adresa
-    [[nodiscard]] const std::string &get_inventory_phone() const; // Returnează telefonul
-    [[nodiscard]] const std::string &get_inventory_email() const; // Returnează email-ul
-    [[nodiscard]] const std::vector<Material> &get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
-    [[nodiscard]] const std::vector<Provider> &get_inventory_providers() const; // Returnează tabloul de furnizori
-    [[nodiscard]] const std::vector<Order> &get_inventory_orders() const; // Returnează tabloul de comenzi
-    [[nodiscard]] int get_inventory_materials_count() const; // Returnează numărul efectiv de materiale stocate în inventar
-    [[nodiscard]] int get_inventory_providers_count() const; // Returnează numărul efectiv de furnizori stocați în inventar
-    [[nodiscard]] int get_inventory_orders_count() const; // Returnează numărul efectiv de comenzi stocate în inventar
-
-    // Metode care modifică starea obiectului
-    void add_material(const Material &material); // Adaugă o copie a obiectului material în inventar
-    void register_provider(std::span<const Provider> available_providers); // Adaugă un nou furnizor
-    void place_order(); // Înregistrează o comandă nouă
-    void consume_material(); // Recalculează cantitatea disponibilă a unui material după consum
-    void receive_order(Order *order); // Procesează o comandă și actualizează stocurile corespunzătoare
-
-    // Metode de căutare pe instanța curentă
-    // Returnează un pointer către obiectul găsit în interiorul inventarului
-    Material *find_material_by_id(std::string_view find_id);
-    Provider *find_provider_by_id(std::string_view find_id);
-    Order *find_order_by_id(std::string_view find_id);
-
-    // Calculează valoarea totală iterând prin toate obiectele Material din instanța curentă
-    [[nodiscard]] double calculate_inventory_value() const;
-
-    // Metode de sortare specifice instanței curente
-    // Modifică ordinea elementelor în tablourile interne
-    void sort_materials_by_name_ascending();
-    void sort_materials_by_name_descending();
-    void sort_materials_by_quantity_ascending();
-    void sort_materials_by_quantity_descending();
-    void sort_orders_by_total_price_ascending();
-    void sort_orders_by_total_price_descending();
-
-    // Filtre
-    // Creează și returnează un nou tablou de obiecte care respectă anumite criterii
-    // Variabila result_count transmisă prin referință va fi modificată pentru a reflecta dimensiunea noului tablou returnat
-    const std::vector<Order> get_orders_by_provider_id(std::string_view provider_id);
-    const std::vector<Material> get_critical_materials();
-    const std::vector<Provider> get_materials_by_category(Material::Category category);
+    const std::string &get_inventory_id() const; // Returnează ID-ul
+    const std::string &get_inventory_name() const; // Returnează numele
+    const std::string &get_inventory_address() const; // Returnează adresa
+    const std::string &get_inventory_phone() const; // Returnează telefonul
+    const std::string &get_inventory_email() const; // Returnează email-ul
+    const std::vector<Material> &get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
+    const std::vector<Provider> &get_inventory_providers() const; // Returnează tabloul de furnizori
+    const std::vector<std::unique_ptr<Transaction>> &get_inventory_transactions() const; // Returnează tabloul de comenzi
+    int get_inventory_materials_count() const; // Returnează numărul efectiv de materiale stocate în inventar
+    int get_inventory_providers_count() const; // Returnează numărul efectiv de furnizori stocați în inventar
+    int get_inventory_transactions_count() const; // Returnează numărul efectiv de comenzi stocate în inventar
+    std::vector<PurchaseOrder> get_purchase_orders_by_provider_id(const std::string &provider_id) const;
+    std::vector<Material> get_critical_materials() const;
+    std::vector<Material> get_materials_by_category(Material::Category category) const;
+    double get_inventory_total_refunds() const;
+    double get_inventory_total_cost() const;
 
     // Supraîncărcarea operatorului de atribuire
     Inventory &operator=(Inventory other);
 
-    // Supraîncărcarea operatorilor relaționali.
-    bool operator==(const Inventory &other) const;
-    bool operator!=(const Inventory &other) const;
-
-    // Supraîncărcarea operatorilor de I/O
-    friend std::istream &operator>>(std::istream &is, Inventory &inventory);
+    // Supraîncărcarea operatorului de output
     friend std::ostream &operator<<(std::ostream &os, const Inventory &inventory);
 
-    // Setters
-    void set_inventory_id(std::string_view new_inventory_id);
-    void set_inventory_name(std::string_view new_inventory_name);
-    void set_inventory_address(std::string_view new_inventory_address);
-    void set_inventory_phone(std::string_view new_inventory_phone);
-    void set_inventory_email(std::string_view new_inventory_email);
-    void set_inventory_materials(std::span<const Material> new_inventory_materials);
-    void set_inventory_providers(std::span<const Provider> new_inventory_providers);
-    void set_inventory_orders(std::span<const Order> new_inventory_orders);
+    // Metode care modifică starea obiectului
+    void register_provider(const std::vector<Provider> &available_providers); // Adaugă un nou furnizor
+    void place_order();
+    void record_consumption();
+    void register_return();
+    void record_adjustment();
+    void process_transaction();
+    void cancel_order();
+
+    // Metode de căutare pe instanța curentă
+    Material *find_material_by_id(const std::string &find_id);
+    const Provider *find_provider_by_id(const std::string &find_id) const;
+    const Transaction *find_transaction_by_id(const std::string &find_id) const;
+
+    // Metode de sortare specifice instanței curente
+    // Modifică ordinea elementelor în tablourile interne
+    static void display_selected_materials_by_name(std::vector<Material> selected_materials, auto lambda) {
+        std::ranges::sort(selected_materials, lambda);
+        print_selected_materials(selected_materials);
+    }
+
+    static void display_selected_materials_by_quantity(std::vector<Material> materials, auto lambda) {
+        std::ranges::sort(materials, lambda);
+        print_selected_materials(materials);
+    }
+
+    static void display_selected_purchase_orders_by_total_price(const std::vector<std::unique_ptr<Transaction>> &transactions, auto lambda) {
+        std::vector<PurchaseOrder> purchase_orders;
+        for (const auto &transaction : transactions) {
+            const auto it = dynamic_cast<PurchaseOrder *>(transaction.get());
+            if (it != nullptr)
+                purchase_orders.push_back(*it);
+        }
+        std::ranges::sort(purchase_orders, lambda);
+        for (const auto &purchase_order : purchase_orders)
+            std::cout << purchase_order << '\n';
+    }
+
+    // Functii helper
+    void print_available_unregistered_providers(const std::vector<Provider> &available_providers) const;
+    static void print_selected_providers(const std::vector<Provider> &selected_providers);
+    static void print_selected_materials(const std::vector<Material> &selected_materials);
+    static void print_selected_purchase_orders(const std::vector<std::unique_ptr<Transaction>> &selected_transactions);
+    static void print_selected_transactions(const std::vector<std::unique_ptr<Transaction>> &selected_transactions);
+
 
 private:
     std::string id; // ID-ul inventarului
@@ -94,20 +108,5 @@ private:
     std::string email; // Email-ul inventarului
     std::vector<Material> materials; // Array-ul de materiale al inventarului
     std::vector<Provider> providers; // Array-ul de furnizori al inventarului
-    std::vector<Order> orders; // Array-ul de comenzi al inventarului
-
-    // Functii helper
-    static void validate_inventory_id(std::string_view new_inventory_id);
-    static void validate_inventory_name(std::string_view new_inventory_name);
-    static void validate_inventory_address(std::string_view new_inventory_address);
-    static void validate_inventory_phone(std::string_view new_inventory_phone);
-    static void validate_inventory_email(std::string_view new_inventory_email);
-    static void validate_inventory_materials(std::span<const Material> new_inventory_materials);
-    static void validate_inventory_providers(std::span<const Provider> new_inventory_providers);
-    static void validate_inventory_orders(std::span<const Order> new_inventory_orders);
-    static void read_string(std::string_view prompt, auto setter);
-    void print_available_unregistered_providers(std::span<const Provider> available_providers);
-    void print_inventory_providers() const;
-    void print_inventory_materials() const;
-    void print_inventory_orders() const;
+    std::vector<std::unique_ptr<Transaction>> transactions; // Array-ul de comenzi al inventarului
 };

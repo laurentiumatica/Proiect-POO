@@ -6,10 +6,14 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Proiect_1 main.cpp
         materials.h
         providers.h
-        orders.h
         materials.cpp
         providers.cpp
-        orders.cpp
         inventory.h
         inventory.cpp
+        transactions.h
+        transactions.cpp
+        utils.h
+        exceptions.h
+        menu.h
+        menu.cpp
 )
