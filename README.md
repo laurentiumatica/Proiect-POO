@@ -38,7 +38,6 @@ Reprezintă un material din inventar cu ID (`MAT-#####`), nume, unitate de măsu
 **Operații principale:**
 - Construcție cu validare completă a tuturor câmpurilor
 - Modificarea cantității, pragului critic și prețului unitar
-- Comparație între materiale (operatorii `==` și `!=`)
 - Citire/afișare prin operatorii `>>` și `<<`
 
 ### Provider
