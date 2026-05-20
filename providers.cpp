@@ -22,8 +22,7 @@ Provider::Provider(std::string id, std::string name, std::string phone, std::str
 }
 
 // Copy constructor
-Provider::Provider(const Provider &other)
-    : Provider(other.id, other.name, other.phone, other.email, other.address, other.materials) {};
+Provider::Provider(const Provider &other) = default;
 
 // Destructorul
 Provider::~Provider() = default;
@@ -50,45 +49,6 @@ Provider &Provider::operator=(Provider other) {
 }
 
 // Supraincarcarea operatorilor de I/O
-std::istream &operator>>(std::istream &is, Provider &provider) {
-    std::vector<Material> buffer;
-    std::string id, name, phone, email, address;
-    int cnt;
-
-    is.ignore();
-
-    read_string("Enter provider ID (expected format: PRV-#####)", [&id](const std::string &s) {
-        validate_provider_id(s);
-        id=s;
-    });
-    read_string("Enter provider name", [&name](const std::string &s) {
-        validate_provider_name(s);
-        name=s;
-    });
-    read_string("Enter provider phone (expected format: 10 digits)", [&phone](const std::string &s) {
-        validate_provider_phone(s);
-        phone=s;
-    });
-    read_string("Enter provider email", [&email](const std::string &s) {
-        validate_provider_email(s);
-        email=s;
-    });
-    read_string("Enter provider address", [&address](const std::string &s) {
-        validate_provider_address(s);
-        address=s;
-    });
-    read_string("Enter number of materials", [&cnt](const std::string &s) { cnt = std::stoi(s); validate_provider_materials_number(cnt); });
-
-    for (int i=0;i<cnt;i++) {
-        Material material;
-        std::cin>>material;
-        buffer.push_back(material);
-    }
-
-    provider=Provider(id,name,phone,email,address,buffer);
-
-    return is;
-}
 std::ostream &operator<<(std::ostream &os, const Provider &provider) {
     os << provider.id << " " << provider.name << "\n";
     os << "|  Phone      : " << provider.phone << "\n";

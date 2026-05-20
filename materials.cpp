@@ -24,10 +24,7 @@ Material::Material(std::string id, std::string name, std::string measure_unit,
 }
 
 // Copy constructorul
-Material::Material(const Material &other)
-    : Material(other.id, other.name, other.measure_unit,
-               other.quantity, other.critical, other.unit_price, other.category) {
-}
+Material::Material(const Material &other) = default;
 
 // Destructor
 Material::~Material() = default;
@@ -75,46 +72,13 @@ std::ostream &operator<<(std::ostream &os, const Material &material) {
     const std::string category = Material::material_category_to_string(material.category);
 
     os << material.id << "  " << material.name << "\n";
-    os << "│  Category   " << category << "\n";
-    os << "│  Quantity   " << std::fixed << std::setprecision(2) << material.quantity << " " << material.measure_unit << "\n";
-    os << "│  Critical   " << std::fixed << std::setprecision(2) << material.critical << " " << material.measure_unit << "\n";
-    os << "│  Price      " << std::fixed << std::setprecision(2) << material.unit_price << " RON\n";
+    os << "|  Category   " << category << "\n";
+    os << "|  Quantity   " << std::fixed << std::setprecision(2) << material.quantity << " " << material.measure_unit << "\n";
+    os << "|  Critical   " << std::fixed << std::setprecision(2) << material.critical << " " << material.measure_unit << "\n";
+    os << "|  Price      " << std::fixed << std::setprecision(2) << material.unit_price << " RON\n";
     os << "|_\n\n";
 
     return os;
-}
-
-std::istream &operator>>(std::istream &is, Material &material) {
-    is.ignore();
-
-    std::string id, measure_unit, name, critical, unit_price, quantity;
-    Material::Category category;
-
-    read_string("Enter material ID", [&id](const std::string &s) { validate_material_id(s); id = s; });
-    read_string("Enter measure unit", [&measure_unit](const std::string &s) { validate_material_measure_unit(s); measure_unit=s; });
-    read_string("Enter material name", [&name](const std::string &s) { validate_material_name(s); name = s; });
-    read_string("Enter material critical level", [&critical](const std::string &s) {
-        validate_material_critical(std::stod(s));
-        critical = s;
-    });
-    read_string("Enter material unit price", [&unit_price](const std::string &s) {
-        validate_material_unit_price(std::stod(s));
-        unit_price = s;
-    });
-    read_string("Enter material quantity", [&quantity](const std::string &s) {
-        validate_material_quantity(std::stod(s));
-        quantity = s;
-    });
-    read_string("Enter material category (0 - wood, 1 - metal, 2 - insulation, 3 - finishes, 4 - others)", [&category](const std::string &s) {
-        const int cat = std::stoi(s);
-        if (cat < 0 || cat > 4)
-            throw ValidationException("Category must be between 0 and 4");
-        category=static_cast<Material::Category>(cat);
-    });
-
-    material = Material(id, name, measure_unit, std::stod(quantity), std::stod(critical), std::stod(unit_price), category);
-
-    return is;
 }
 
 // Convertor category la string

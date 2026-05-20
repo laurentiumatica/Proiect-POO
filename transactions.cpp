@@ -118,7 +118,7 @@ void PurchaseOrder::do_apply(Inventory &inventory) {
                 found_material->get_material_quantity() + material.get_material_quantity());
         else {
             Material new_material = material;
-            read_string("Enter new material critical level", [&new_material](const std::string &s) {
+            read_string("Enter new material critical level ("+ material.get_material_id()+")", [&new_material](const std::string &s) {
                 new_material.set_material_critical(std::stod(s));
             });
             std::vector<Material> new_materials = inventory.get_inventory_materials();
@@ -182,7 +182,7 @@ void ConsumptionRecord::do_apply(Inventory &inventory) {
         found_material->set_material_quantity(
             found_material->get_material_quantity() - material.get_material_quantity());
     }
-    inventory.set_inventory_materials(std::move(dummy));
+    inventory.set_inventory_materials(dummy);
 }
 
 void ConsumptionRecord::do_print(std::ostream &os) const {
@@ -246,7 +246,7 @@ void ReturnTransaction::do_apply(Inventory &inventory) {
         found_material->set_material_quantity(
             found_material->get_material_quantity() - material.get_material_quantity());
     }
-    inventory.set_inventory_materials(std::move(dummy));
+    inventory.set_inventory_materials(dummy);
 }
 
 void ReturnTransaction::do_print(std::ostream &os) const {
@@ -294,7 +294,7 @@ void AdjustmentTransaction::do_apply(Inventory &inventory) {
                 "Material " + material.get_material_id() + " not found in inventory for adjustment");
         found_material->set_material_quantity(material.get_material_quantity());
     }
-    inventory.set_inventory_materials(std::move(dummy));
+    inventory.set_inventory_materials(dummy);
 }
 
 void AdjustmentTransaction::do_print(std::ostream &os) const {

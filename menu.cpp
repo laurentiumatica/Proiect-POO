@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "exceptions.h"
 #include "utils.h"
+#include "stock_observer.h"
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -126,8 +127,9 @@ Menu::Menu() {
         "Strada Principala 10 Satu Mare",
         "0712345678",
         "depozit@constructii.ro",
-        {}, registered, {}
+        {}, registered
     );
+    inventory.add_observer(std::make_unique<LowStockAlert>());
 }
 
 // Destructor privat
@@ -277,7 +279,7 @@ void Menu::materials_menu() {
                 }
                 case 2: {
                     std::string search_id;
-                    read_string("Enter material ID to search", [&search_id](const std::string &s) {
+                    read_string("Enter material ID to search (expected format: MAT-#####)", [&search_id](const std::string &s) {
                         validate_material_id(s);
                         search_id = s;
                     });
@@ -383,7 +385,7 @@ void Menu::providers_menu() {
         std::cout << "0. Back\n";
         std::cout << "------------------------------\n";
 
-        const int option = read_option("Select option: ", 0, 5);
+        const int option = read_option("Select option: ", 0, 4);
 
         try {
             switch (option) {
@@ -405,7 +407,7 @@ void Menu::providers_menu() {
                 }
                 case 4: {
                     std::string search_id;
-                    read_string("Enter provider ID to search", [&search_id](const std::string &s) {
+                    read_string("Enter provider ID to search (expected format: PRV-#####)", [&search_id](const std::string &s) {
                         validate_provider_id(s);
                         search_id = s;
                     });
@@ -520,7 +522,7 @@ void Menu::transactions_menu() {
                 }
                 case 9: {
                     std::string search_id;
-                    read_string("Enter transaction ID to search", [&search_id](const std::string &s) {
+                    read_string("Enter transaction ID to search (expected format: TRN-#####)", [&search_id](const std::string &s) {
                         validate_transaction_id(s);
                         search_id = s;
                     });
@@ -577,7 +579,7 @@ void Menu::reports_menu() const {
                     } else {
                         Inventory::print_selected_providers(inventory.get_inventory_providers());
                         std::string provider_id;
-                        read_string("Enter provider ID", [&provider_id, this](const std::string &s) {
+                        read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id, this](const std::string &s) {
                             validate_provider_id(s);
                             if (inventory.find_provider_by_id(s) == nullptr)
                                 throw ResourceNotFoundException("Provider not found in registered providers");
@@ -651,13 +653,12 @@ void Menu::developer_menu() {
         std::cout << "     DEVELOPER MODE\n";
         std::cout << "------------------------------\n";
         std::cout << "1. List all global providers\n";
-        std::cout << "2. Add new global provider\n";
-        std::cout << "3. View global provider materials\n";
-        std::cout << "4. Show system stats\n";
+        std::cout << "2. View global provider materials\n";
+        std::cout << "3. Show system stats\n";
         std::cout << "0. Logout\n";
         std::cout << "------------------------------\n";
 
-        const int option = read_option("Select option: ", 0, 4);
+        const int option = read_option("Select option: ", 0, 3);
 
         try {
             switch (option) {
@@ -672,26 +673,11 @@ void Menu::developer_menu() {
                     break;
                 }
                 case 2: {
-                    Provider new_provider;
-                    std::cin >> new_provider;
-
-                    // Verificam daca ID-ul exista deja
-                    auto it = std::ranges::find_if(available_providers, [&new_provider](const Provider &p) {
-                        return p.get_provider_id() == new_provider.get_provider_id();
-                    });
-                    if (it != available_providers.end())
-                        throw ValidationException("A global provider with this ID already exists");
-
-                    available_providers.push_back(new_provider);
-                    std::cout << "Global provider added successfully.\n";
-                    break;
-                }
-                case 3: {
                     if (available_providers.empty()) {
                         std::cout << "No global providers registered.\n";
                     } else {
                         std::string provider_id;
-                        read_string("Enter provider ID", [&provider_id](const std::string &s) {
+                        read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id](const std::string &s) {
                             validate_provider_id(s);
                             provider_id = s;
                         });
@@ -706,7 +692,7 @@ void Menu::developer_menu() {
                     }
                     break;
                 }
-                case 4: {
+                case 3: {
                     std::cout << "\n--- System Stats ---\n";
                     std::cout << "Global providers:       " << available_providers.size() << "\n";
                     int total_materials = 0;

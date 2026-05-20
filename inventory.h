@@ -1,10 +1,13 @@
 #pragma once
 #include "materials.h"
 #include "transactions.h"
+#include "repository.h"
 #include "providers.h"
 #include <memory>
 #include <algorithm>
 #include <iostream>
+
+#include "stock_observer.h"
 
 class Inventory {
 public:
@@ -17,8 +20,7 @@ public:
     // Constructor cu parametri
     Inventory(std::string id, std::string name, std::string address,
               std::string phone, std::string email,
-              std::vector<Material> materials, std::vector<Provider> providers,
-              std::vector<std::unique_ptr<Transaction>> transactions);
+              const std::vector<Material> &materials, const std::vector<Provider> &providers);
 
     // Destructor
     ~Inventory();
@@ -28,7 +30,7 @@ public:
     void set_inventory_address(std::string set_address);
     void set_inventory_phone(std::string set_phone);
     void set_inventory_email(std::string set_email);
-    void set_inventory_materials(std::vector<Material> set_materials);
+    void set_inventory_materials(const std::vector<Material>& set_materials);
 
     // Getters
     const std::vector<Material> &get_inventory_materials() const; // Returnează adresa de început a tabloului de materiale
@@ -94,6 +96,9 @@ public:
     static void print_selected_purchase_orders(const std::vector<std::unique_ptr<Transaction>> &selected_transactions);
     static void print_selected_transactions(const std::vector<std::unique_ptr<Transaction>> &selected_transactions);
 
+    // Functii design pattern
+    void add_observer(std::unique_ptr<StockObserver> observer);
+
 
 private:
     std::string id; // ID-ul inventarului
@@ -101,7 +106,10 @@ private:
     std::string address; // Adresa inventarului
     std::string phone; // Numărul de telefon al inventarului
     std::string email; // Email-ul inventarului
-    std::vector<Material> materials; // Array-ul de materiale al inventarului
-    std::vector<Provider> providers; // Array-ul de furnizori al inventarului
+    Repository<Material> materials; // Materialele
+    Repository<Provider> providers; // Furnizorii
     std::vector<std::unique_ptr<Transaction>> transactions; // Array-ul de comenzi al inventarului
+    std::vector<std::unique_ptr<StockObserver>> observers;
+
+    void notify_observers(const Material &material) const;
 };

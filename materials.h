@@ -38,7 +38,6 @@ public:
     Material &operator=(Material other);
 
     // Supraincarcarea operatorilor de I/O
-    friend std::istream &operator>>(std::istream &is, Material &material);
     friend std::ostream &operator<<(std::ostream &os, const Material &material);
 
     // Convertor category la string

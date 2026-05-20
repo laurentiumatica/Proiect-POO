@@ -33,7 +33,6 @@ public:
     Provider &operator=(Provider other);
 
     // Supraincarcarea operatorilor de I/O
-    friend std::istream &operator>>(std::istream &is, Provider &provider);
     friend std::ostream &operator<<(std::ostream &os, const Provider &provider);
 
     // Functii helper

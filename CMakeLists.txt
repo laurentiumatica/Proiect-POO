@@ -16,4 +16,7 @@ add_executable(Proiect_1 main.cpp
         exceptions.h
         menu.h
         menu.cpp
+        repository.h
+        transaction_factory.h
+        stock_observer.h
 )
