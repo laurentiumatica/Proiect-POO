@@ -4,7 +4,7 @@ Program destinat gestionării materialelor, furnizorilor și tranzacțiilor pent
 
 ---
 
-## Review — Proiect POO: Sistem de Gestiune a Inventarului
+## Review: Sistem de Gestiune a Inventarului
  
 Proiectul meu implementează un sistem de gestiune a unui depozit de materiale de construcții. Ideea de implementare pleacă de la o problemă concretă în business. Un depozit primește marfă de la furnizori, o consumă pentru diverse proiecte, înregistrează returnări și efectuează ajustări de stoc, iar toate aceste operații trebuie urmărite, validate și raportate. Soluția aleasă implementează fiecare dintre aceste concepte o clasă clar definită: material, furnizor, tranzacție, inventar, și organizează interacțiunea dintre ele printr-o aplicație în terminal cu meniu interactiv. Întregul cod este împărțit în fișiere `.h` și `.cpp` separate pentru fiecare clasă, ceea ce a făcut ca dezvoltarea acestuia să fie mai ușor de gestionat pe parcurs.
  
