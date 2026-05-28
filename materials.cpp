@@ -15,12 +15,12 @@ Material::Material(std::string id, std::string name, std::string measure_unit,
                    const double quantity, const double critical, const double unit_price, const Category category)
     : id(std::move(id)), name(std::move(name)), measure_unit(std::move(measure_unit)),
       quantity(quantity), critical(critical), unit_price(unit_price), category(category) {
-    validate_material_id(this->id);
-    validate_material_name(this->name);
-    validate_material_measure_unit(this->measure_unit);
-    validate_material_quantity(this->quantity);
-    validate_material_critical(this->critical);
-    validate_material_unit_price(this->unit_price);
+    Utils::validate_material_id(this->id);
+    Utils::validate_material_name(this->name);
+    Utils::validate_material_measure_unit(this->measure_unit);
+    Utils::validate_material_quantity(this->quantity);
+    Utils::validate_material_critical(this->critical);
+    Utils::validate_material_unit_price(this->unit_price);
 }
 
 // Copy constructorul
@@ -31,17 +31,17 @@ Material::~Material() = default;
 
 // Setters
 void Material::set_material_critical(const double set_critical) {
-    validate_material_critical(set_critical);
+    Utils::validate_material_critical(set_critical);
     critical = set_critical;
 }
 
 void Material::set_material_unit_price(const double set_unit_price) {
-    validate_material_unit_price(set_unit_price);
+    Utils::validate_material_unit_price(set_unit_price);
     unit_price = set_unit_price;
 }
 
 void Material::set_material_quantity(const double set_quantity) {
-    validate_material_quantity(set_quantity);
+    Utils::validate_material_quantity(set_quantity);
     quantity = set_quantity;
 }
 

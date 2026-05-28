@@ -13,12 +13,12 @@ Provider::Provider() = default;
 // Constructorul cu parametri
 Provider::Provider(std::string id, std::string name, std::string phone, std::string email, std::string address, std::vector<Material> materials)
     : id(std::move(id)),name(std::move(name)), phone(std::move(phone)), email(std::move(email)), address(std::move(address)), materials(std::move(materials)) {
-    validate_provider_id(this->id);
-    validate_provider_name(this->name);
-    validate_provider_phone(this->phone);
-    validate_provider_email(this->email);
-    validate_provider_address(this->address);
-    validate_provider_materials(this->materials);
+    Utils::validate_provider_id(this->id);
+    Utils::validate_provider_name(this->name);
+    Utils::validate_provider_phone(this->phone);
+    Utils::validate_provider_email(this->email);
+    Utils::validate_provider_address(this->address);
+    Utils::validate_provider_materials(this->materials);
 }
 
 // Copy constructor

@@ -16,9 +16,9 @@ Transaction::Transaction() = default;
 // Constructorul cu parametri
 Transaction::Transaction(std::string id, std::string date, std::vector<Material> materials)
     : id(std::move(id)), date(std::move(date)), materials(std::move(materials)) {
-    validate_transaction_id(this->id);
-    validate_transaction_date(this->date);
-    validate_transaction_materials(this->materials);
+    Utils::validate_transaction_id(this->id);
+    Utils::validate_transaction_date(this->date);
+    Utils::validate_transaction_materials(this->materials);
 }
 
 // Constructorul de copiere
@@ -71,7 +71,7 @@ PurchaseOrder::PurchaseOrder(std::string id, std::string date, std::vector<Mater
                              const Status status)
     : Transaction(std::move(id), std::move(date), std::move(materials)), provider_id(std::move(provider_id)),
       status(status) {
-    validate_provider_id(this->provider_id);
+    Utils::validate_provider_id(this->provider_id);
 }
 
 // Constructorul de copiere
@@ -118,7 +118,7 @@ void PurchaseOrder::do_apply(Inventory &inventory) {
                 found_material->get_material_quantity() + material.get_material_quantity());
         else {
             Material new_material = material;
-            read_string("Enter new material critical level ("+ material.get_material_id()+")", [&new_material](const std::string &s) {
+            Utils::read_string("Enter new material critical level ("+ material.get_material_id()+")", [&new_material](const std::string &s) {
                 new_material.set_material_critical(std::stod(s));
             });
             std::vector<Material> new_materials = inventory.get_inventory_materials();
@@ -149,8 +149,8 @@ ConsumptionRecord::ConsumptionRecord(std::string id, std::string date, std::vect
                                      std::string project_name, std::string department)
     : Transaction(std::move(id), std::move(date), std::move(materials)), project_name(std::move(project_name)),
       department(std::move(department)) {
-    validate_consumption_record_project_name(this->project_name);
-    validate_consumption_record_department(this->department);
+    Utils::validate_consumption_record_project_name(this->project_name);
+    Utils::validate_consumption_record_department(this->department);
 }
 
 // Constructor de copiere
@@ -206,16 +206,16 @@ ReturnTransaction::ReturnTransaction(std::string id, std::string date, std::vect
                                      std::string original_transaction_id, std::string reason)
     : Transaction(std::move(id), std::move(date), std::move(materials)),
       original_transaction_id(std::move(original_transaction_id)), reason(std::move(reason)), return_amount(0) {
-    validate_transaction_id(this->original_transaction_id);
-    validate_refund_transaction_reason(this->reason);
+    Utils::validate_transaction_id(this->original_transaction_id);
+    Utils::validate_refund_transaction_reason(this->reason);
 }
 
 // Constructorul de copiere
 ReturnTransaction::ReturnTransaction(const ReturnTransaction &other)
     : Transaction(other.id, other.date, other.materials), original_transaction_id(other.original_transaction_id),
       reason(other.reason), return_amount(other.return_amount) {
-    validate_transaction_id(this->original_transaction_id);
-    validate_refund_transaction_reason(this->reason);
+    Utils::validate_transaction_id(this->original_transaction_id);
+    Utils::validate_refund_transaction_reason(this->reason);
 }
 
 // Destructor
@@ -268,7 +268,7 @@ AdjustmentTransaction::AdjustmentTransaction() = default;
 // Constructorul cu parametri
 AdjustmentTransaction::AdjustmentTransaction(std::string id, std::string date, std::vector<Material> materials, std::string reason)
     : Transaction(std::move(id), std::move(date), std::move(materials)), reason(std::move(reason)) {
-    validate_adjustment_transaction_reason(this->reason);
+    Utils::validate_adjustment_transaction_reason(this->reason);
 }
 
 // Constructor de copiere

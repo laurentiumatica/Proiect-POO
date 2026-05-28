@@ -19,11 +19,11 @@ Inventory::Inventory(std::string id, std::string name, std::string address, std:
       email(std::move(email)),
       materials([](const Material& m) { return m.get_material_id(); }),
       providers([](const Provider& p) { return p.get_provider_id(); }) {
-    validate_inventory_id(this->id);
-    validate_inventory_name(this->name);
-    validate_inventory_address(this->address);
-    validate_inventory_phone(this->phone);
-    validate_inventory_email(this->email);
+    Utils::validate_inventory_id(this->id);
+    Utils::validate_inventory_name(this->name);
+    Utils::validate_inventory_address(this->address);
+    Utils::validate_inventory_phone(this->phone);
+    Utils::validate_inventory_email(this->email);
     for (const auto& m : materials)
         this->materials.add(m);
     for (const auto& p : providers)
@@ -104,27 +104,27 @@ std::vector<Material> Inventory::get_materials_by_category(const Material::Categ
 
 // Setters
 void Inventory::set_inventory_name(std::string set_name) {
-    validate_inventory_name(set_name);
+    Utils::validate_inventory_name(set_name);
     name = std::move(set_name);
 }
 
 void Inventory::set_inventory_address(std::string set_address) {
-    validate_inventory_address(set_address);
+    Utils::validate_inventory_address(set_address);
     address = std::move(set_address);
 }
 
 void Inventory::set_inventory_phone(std::string set_phone) {
-    validate_inventory_phone(set_phone);
+    Utils::validate_inventory_phone(set_phone);
     phone = std::move(set_phone);
 }
 
 void Inventory::set_inventory_email(std::string set_email) {
-    validate_inventory_email(set_email);
+    Utils::validate_inventory_email(set_email);
     email = std::move(set_email);
 }
 
 void Inventory::set_inventory_materials(const std::vector<Material>& set_materials) {
-    validate_inventory_materials(set_materials);
+    Utils::validate_inventory_materials(set_materials);
     materials.clear();
     for (const auto &material: set_materials)
         materials.add(material);
@@ -133,7 +133,7 @@ void Inventory::set_inventory_materials(const std::vector<Material>& set_materia
 // Metode care modifica starea obiectului
 void Inventory::register_provider(const std::vector<Provider> &available_providers) {
     print_available_unregistered_providers(available_providers);
-    read_string("Enter provider ID to register (expected format: PRV-#####)", [this, &available_providers](const std::string &s) {
+    Utils::read_string("Enter provider ID to register (expected format: PRV-#####)", [this, &available_providers](const std::string &s) {
         auto it = std::ranges::find_if(available_providers,
                                        [&s](const Provider &p) { return p.get_provider_id() == s; });
         if (it == available_providers.end())
@@ -148,25 +148,25 @@ void Inventory::register_provider(const std::vector<Provider> &available_provide
 void Inventory::place_order() {
     std::string order_id, order_date, order_provider_id;
     int order_material_count;
-    read_string("Enter purchase order ID (expected format: TRN-#####)", [&order_id, this](const std::string &s) {
-        validate_transaction_id(s);
-        validate_transaction_uniqueness(s, transactions);
+    Utils::read_string("Enter purchase order ID (expected format: TRN-#####)", [&order_id, this](const std::string &s) {
+        Utils::validate_transaction_id(s);
+        Utils::validate_transaction_uniqueness(s, transactions);
         order_id = s;
     });
-    read_string("Enter purchase order date (expected format: DD-MM-YYYY)", [&order_date](const std::string &s) {
-        validate_transaction_date(s);
+    Utils::read_string("Enter purchase order date (expected format: DD-MM-YYYY)", [&order_date](const std::string &s) {
+        Utils::validate_transaction_date(s);
         order_date = s;
     });
     print_selected_providers(providers.get_items());
-    read_string("Enter purchase order provider ID (expected format: PRV-#####)", [&order_provider_id, this](const std::string &s) {
-        validate_provider_id(s);
+    Utils::read_string("Enter purchase order provider ID (expected format: PRV-#####)", [&order_provider_id, this](const std::string &s) {
+        Utils::validate_provider_id(s);
         if (find_provider_by_id(s) == nullptr)
             throw ResourceNotFoundException("Provider not found in registered providers");
         order_provider_id = s;
     });
-    read_string("Enter number of materials to order", [&order_material_count](const std::string &s) {
+    Utils::read_string("Enter number of materials to order", [&order_material_count](const std::string &s) {
         const int count = std::stoi(s);
-        validate_transaction_materials_number(count);
+        Utils::validate_transaction_materials_number(count);
         order_material_count = count;
     });
     std::vector<Material> available_materials = find_provider_by_id(order_provider_id)->get_provider_materials();
@@ -175,10 +175,10 @@ void Inventory::place_order() {
         throw ValidationException("Cannot order more unique materials than the provider supplies");
     for (int i = 0; i < order_material_count; i++) {
         Material order_material;
-        read_string("Enter material ID to purchase (expected format: MAT-#####)",
+        Utils::read_string("Enter material ID to purchase (expected format: MAT-#####)",
                     [&available_materials, &order_material, &order_materials](const std::string &s) {
-                        validate_material_id(s);
-                        validate_materials_uniqueness(s, order_materials);
+                        Utils::validate_material_id(s);
+                        Utils::validate_materials_uniqueness(s, order_materials);
                         auto it = std::ranges::find_if(available_materials, [&s](const Material &m) {
                             return m.get_material_id() == s;
                         });
@@ -187,7 +187,7 @@ void Inventory::place_order() {
                                 "Material not found in provider's materials list");
                         order_material = *it;
                     });
-        read_string("Enter material quantity to order", [&order_material](const std::string &s) {
+        Utils::read_string("Enter material quantity to order", [&order_material](const std::string &s) {
             order_material.set_material_quantity(std::stod(s));
         });
         order_materials.push_back(order_material);
@@ -199,27 +199,27 @@ void Inventory::record_consumption() {
     std::string consumption_id, consumption_date, consumption_project_name, consumption_department;
     int consumption_material_count;
 
-    read_string("Enter consumption record order ID (expected format: TRN-#####)", [&consumption_id, this](const std::string &s) {
-        validate_transaction_id(s);
-        validate_transaction_uniqueness(s, transactions);
+    Utils::read_string("Enter consumption record order ID (expected format: TRN-#####)", [&consumption_id, this](const std::string &s) {
+        Utils::validate_transaction_id(s);
+        Utils::validate_transaction_uniqueness(s, transactions);
         consumption_id = s;
     });
-    read_string("Enter consumption record order date (expected format: DD-MM-YYYY)", [&consumption_date](const std::string &s) {
-        validate_transaction_date(s);
+    Utils::read_string("Enter consumption record order date (expected format: DD-MM-YYYY)", [&consumption_date](const std::string &s) {
+        Utils::validate_transaction_date(s);
         consumption_date = s;
     });
-    read_string("Enter consumption record project name", [&consumption_project_name](const std::string &s) {
-        validate_consumption_record_project_name(s);
+    Utils::read_string("Enter consumption record project name", [&consumption_project_name](const std::string &s) {
+        Utils::validate_consumption_record_project_name(s);
         consumption_project_name = s;
     });
-    read_string("Enter consumption record department", [&consumption_department](const std::string &s) {
-        validate_consumption_record_department(s);
+    Utils::read_string("Enter consumption record department", [&consumption_department](const std::string &s) {
+        Utils::validate_consumption_record_department(s);
         consumption_department = s;
     });
     print_selected_materials(materials.get_items());
-    read_string("Enter number of materials to consume", [&consumption_material_count](const std::string &s) {
+    Utils::read_string("Enter number of materials to consume", [&consumption_material_count](const std::string &s) {
         const int count = std::stoi(s);
-        validate_transaction_materials_number(count);
+        Utils::validate_transaction_materials_number(count);
         consumption_material_count = count;
     });
     std::vector<Material> consumption_materials;
@@ -227,15 +227,15 @@ void Inventory::record_consumption() {
         throw ValidationException("Cannot consume more unique materials than the inventory has");
     for (int i = 0; i < consumption_material_count; i++) {
         Material consumption_material;
-        read_string("Enter material ID to consume (expected format: MAT-#####)", [this, &consumption_material, &consumption_materials](const std::string &s) {
-            validate_material_id(s);
-            validate_materials_uniqueness(s, consumption_materials);
+        Utils::read_string("Enter material ID to consume (expected format: MAT-#####)", [this, &consumption_material, &consumption_materials](const std::string &s) {
+            Utils::validate_material_id(s);
+            Utils::validate_materials_uniqueness(s, consumption_materials);
             auto it = std::ranges::find_if(materials.get_items(), [&s](const Material &m) { return m.get_material_id() == s; });
             if (it == materials.get_items().end())
                 throw ResourceNotFoundException("Material not found in inventory");
             consumption_material = *it;
         });
-        read_string("Enter material quantity to consume", [&consumption_material, this](const std::string &s) {
+        Utils::read_string("Enter material quantity to consume", [&consumption_material, this](const std::string &s) {
             const double consumption_quantity = std::stod(s);
             const Material *current = find_material_by_id(consumption_material.get_material_id());
             if (current && consumption_quantity > current->get_material_quantity())
@@ -252,29 +252,29 @@ void Inventory::register_return() {
     std::string return_id, return_date, return_original_id, return_reason;
     int return_material_count;
 
-    read_string("Enter return transaction ID (expected format: TRN-#####)", [&return_id, this](const std::string &s) {
-        validate_transaction_id(s);
-        validate_transaction_uniqueness(s, transactions);
+    Utils::read_string("Enter return transaction ID (expected format: TRN-#####)", [&return_id, this](const std::string &s) {
+        Utils::validate_transaction_id(s);
+        Utils::validate_transaction_uniqueness(s, transactions);
         return_id = s;
     });
-    read_string("Enter return transaction date (expected format: DD-MM-YYYY)", [&return_date](const std::string &s) {
-        validate_transaction_date(s);
+    Utils::read_string("Enter return transaction date (expected format: DD-MM-YYYY)", [&return_date](const std::string &s) {
+        Utils::validate_transaction_date(s);
         return_date = s;
     });
-    read_string("Enter original order ID (expected format: TRN-#####)", [&return_original_id, this](const std::string &s) {
-        validate_transaction_id(s);
+    Utils::read_string("Enter original order ID (expected format: TRN-#####)", [&return_original_id, this](const std::string &s) {
+        Utils::validate_transaction_id(s);
         if (find_transaction_by_id(s) == nullptr)
             throw ResourceNotFoundException("Original transaction with ID " + s + " not found in inventory");
         return_original_id = s;
     });
-    read_string("Enter return reason", [&return_reason](const std::string &s) {
-        validate_refund_transaction_reason(s);
+    Utils::read_string("Enter return reason", [&return_reason](const std::string &s) {
+        Utils::validate_refund_transaction_reason(s);
         return_reason = s;
     });
     print_selected_materials(materials.get_items());
-    read_string("Enter number of materials to return", [&return_material_count](const std::string &s) {
+    Utils::read_string("Enter number of materials to return", [&return_material_count](const std::string &s) {
         const int count = std::stoi(s);
-        validate_transaction_materials_number(count);
+        Utils::validate_transaction_materials_number(count);
         return_material_count = count;
     });
     if (return_material_count > static_cast<int>(materials.count()))
@@ -282,15 +282,15 @@ void Inventory::register_return() {
     std::vector<Material> return_materials;
     for (int i = 0; i < return_material_count; i++) {
         Material return_material;
-        read_string("Enter material ID to return (expected format: MAT-#####)", [this, &return_material, &return_materials](const std::string &s) {
-            validate_material_id(s);
-            validate_materials_uniqueness(s, return_materials);
+        Utils::read_string("Enter material ID to return (expected format: MAT-#####)", [this, &return_material, &return_materials](const std::string &s) {
+            Utils::validate_material_id(s);
+            Utils::validate_materials_uniqueness(s, return_materials);
             auto it = std::ranges::find_if(materials.get_items(), [&s](const Material &m) { return m.get_material_id() == s; });
             if (it == materials.get_items().end())
                 throw ResourceNotFoundException("Material not found in inventory");
             return_material = *it;
         });
-        read_string("Enter material quantity to return", [&return_material, this](const std::string &s) {
+        Utils::read_string("Enter material quantity to return", [&return_material, this](const std::string &s) {
             const double return_quantity = std::stod(s);
             const Material *current = find_material_by_id(return_material.get_material_id());
             if (current && return_quantity > current->get_material_quantity())
@@ -307,23 +307,23 @@ void Inventory::record_adjustment() {
     std::string adjustment_id, adjustment_date, adjustment_reason;
     int adjustment_material_count;
 
-    read_string("Enter adjustment transaction ID (expected format: TRN-#####)", [&adjustment_id, this](const std::string &s) {
-        validate_transaction_id(s);
-        validate_transaction_uniqueness(s, transactions);
+    Utils::read_string("Enter adjustment transaction ID (expected format: TRN-#####)", [&adjustment_id, this](const std::string &s) {
+        Utils::validate_transaction_id(s);
+        Utils::validate_transaction_uniqueness(s, transactions);
         adjustment_id = s;
     });
-    read_string("Enter adjustment transaction date (expected format: DD-MM-YYYY)", [&adjustment_date](const std::string &s) {
-        validate_transaction_date(s);
+    Utils::read_string("Enter adjustment transaction date (expected format: DD-MM-YYYY)", [&adjustment_date](const std::string &s) {
+        Utils::validate_transaction_date(s);
         adjustment_date = s;
     });
-    read_string("Enter adjustment reason", [&adjustment_reason](const std::string &s) {
-        validate_adjustment_transaction_reason(s);
+    Utils::read_string("Enter adjustment reason", [&adjustment_reason](const std::string &s) {
+        Utils::validate_adjustment_transaction_reason(s);
         adjustment_reason = s;
     });
     print_selected_materials(materials.get_items());
-    read_string("Enter number of materials to adjust", [&adjustment_material_count](const std::string &s) {
+    Utils::read_string("Enter number of materials to adjust", [&adjustment_material_count](const std::string &s) {
         const int count = std::stoi(s);
-        validate_transaction_materials_number(count);
+        Utils::validate_transaction_materials_number(count);
         adjustment_material_count = count;
     });
     if (adjustment_material_count > static_cast<int>(materials.count()))
@@ -331,15 +331,15 @@ void Inventory::record_adjustment() {
     std::vector<Material> adjustment_materials;
     for (int i = 0; i < adjustment_material_count; i++) {
         Material adjustment_material;
-        read_string("Enter material ID to adjust (expected format: MAT-#####)", [this, &adjustment_material, &adjustment_materials](const std::string &s) {
-            validate_material_id(s);
-            validate_materials_uniqueness(s, adjustment_materials);
+        Utils::read_string("Enter material ID to adjust (expected format: MAT-#####)", [this, &adjustment_material, &adjustment_materials](const std::string &s) {
+            Utils::validate_material_id(s);
+            Utils::validate_materials_uniqueness(s, adjustment_materials);
             auto it=std::ranges::find_if(materials.get_items(),[&s](const Material &m){return m.get_material_id() == s;});
             if (it==materials.get_items().end())
                 throw ResourceNotFoundException("Material not found in inventory");
             adjustment_material=*it;
         });
-        read_string("Enter corrected quantity", [&adjustment_material](const std::string &s) {
+        Utils::read_string("Enter corrected quantity", [&adjustment_material](const std::string &s) {
             adjustment_material.set_material_quantity(std::stod(s));
         });
         adjustment_materials.push_back(adjustment_material);
@@ -351,8 +351,8 @@ void Inventory::process_transaction() {
     print_selected_transactions(transactions);
 
     std::string transaction_id;
-    read_string("Enter transaction ID to process (expected format: TRN-#####)", [&transaction_id](const std::string &s) {
-        validate_transaction_id(s);
+    Utils::read_string("Enter transaction ID to process (expected format: TRN-#####)", [&transaction_id](const std::string &s) {
+        Utils::validate_transaction_id(s);
         transaction_id = s;
     });
     auto it = std::ranges::find_if(transactions, [&transaction_id](const std::unique_ptr<Transaction> &t) {
@@ -381,8 +381,8 @@ void Inventory::cancel_order() {
     print_selected_purchase_orders(transactions);
 
     std::string transaction_id;
-    read_string("Enter transaction ID to cancel (expected format: TRN-#####)", [&transaction_id](const std::string &s) {
-        validate_transaction_id(s);
+    Utils::read_string("Enter transaction ID to cancel (expected format: TRN-#####)", [&transaction_id](const std::string &s) {
+        Utils::validate_transaction_id(s);
         transaction_id = s;
     });
     auto it = std::ranges::find_if(transactions, [&transaction_id](const std::unique_ptr<Transaction> &t) {

@@ -214,25 +214,25 @@ void Menu::inventory_menu() {
                     std::cout << "\n" << inventory;
                     break;
                 case 2:
-                    read_string("Enter new inventory name", [this](const std::string &s) {
+                    Utils::read_string("Enter new inventory name", [this](const std::string &s) {
                         inventory.set_inventory_name(s);
                     });
                     std::cout << "Inventory name updated.\n";
                     break;
                 case 3:
-                    read_string("Enter new inventory address", [this](const std::string &s) {
+                    Utils::read_string("Enter new inventory address", [this](const std::string &s) {
                         inventory.set_inventory_address(s);
                     });
                     std::cout << "Inventory address updated.\n";
                     break;
                 case 4:
-                    read_string("Enter new inventory phone", [this](const std::string &s) {
+                    Utils::read_string("Enter new inventory phone", [this](const std::string &s) {
                         inventory.set_inventory_phone(s);
                     });
                     std::cout << "Inventory phone updated.\n";
                     break;
                 case 5:
-                    read_string("Enter new inventory email", [this](const std::string &s) {
+                    Utils::read_string("Enter new inventory email", [this](const std::string &s) {
                         inventory.set_inventory_email(s);
                     });
                     std::cout << "Inventory email updated.\n";
@@ -279,8 +279,8 @@ void Menu::materials_menu() {
                 }
                 case 2: {
                     std::string search_id;
-                    read_string("Enter material ID to search (expected format: MAT-#####)", [&search_id](const std::string &s) {
-                        validate_material_id(s);
+                    Utils::read_string("Enter material ID to search (expected format: MAT-#####)", [&search_id](const std::string &s) {
+                        Utils::validate_material_id(s);
                         search_id = s;
                     });
                     const Material *found = inventory.find_material_by_id(search_id);
@@ -407,8 +407,8 @@ void Menu::providers_menu() {
                 }
                 case 4: {
                     std::string search_id;
-                    read_string("Enter provider ID to search (expected format: PRV-#####)", [&search_id](const std::string &s) {
-                        validate_provider_id(s);
+                    Utils::read_string("Enter provider ID to search (expected format: PRV-#####)", [&search_id](const std::string &s) {
+                        Utils::validate_provider_id(s);
                         search_id = s;
                     });
                     const Provider *found = inventory.find_provider_by_id(search_id);
@@ -522,8 +522,8 @@ void Menu::transactions_menu() {
                 }
                 case 9: {
                     std::string search_id;
-                    read_string("Enter transaction ID to search (expected format: TRN-#####)", [&search_id](const std::string &s) {
-                        validate_transaction_id(s);
+                    Utils::read_string("Enter transaction ID to search (expected format: TRN-#####)", [&search_id](const std::string &s) {
+                        Utils::validate_transaction_id(s);
                         search_id = s;
                     });
                     const Transaction *found = inventory.find_transaction_by_id(search_id);
@@ -579,8 +579,8 @@ void Menu::reports_menu() const {
                     } else {
                         Inventory::print_selected_providers(inventory.get_inventory_providers());
                         std::string provider_id;
-                        read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id, this](const std::string &s) {
-                            validate_provider_id(s);
+                        Utils::read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id, this](const std::string &s) {
+                            Utils::validate_provider_id(s);
                             if (inventory.find_provider_by_id(s) == nullptr)
                                 throw ResourceNotFoundException("Provider not found in registered providers");
                             provider_id = s;
@@ -677,8 +677,8 @@ void Menu::developer_menu() {
                         std::cout << "No global providers registered.\n";
                     } else {
                         std::string provider_id;
-                        read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id](const std::string &s) {
-                            validate_provider_id(s);
+                        Utils::read_string("Enter provider ID (expected format: PRV-#####)", [&provider_id](const std::string &s) {
+                            Utils::validate_provider_id(s);
                             provider_id = s;
                         });
                         auto it = std::ranges::find_if(available_providers, [&provider_id](const Provider &p) {
